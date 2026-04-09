@@ -1,13 +1,13 @@
-import { app, BrowserWindow } from "electron";
-import { Menu } from "electron";
+import pkg from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import { BDpc } from "./ipcs/index.js";
 import { initializeDatabase, closeDatabase } from "./database/db.js";
+const { app, BrowserWindow, Menu } = pkg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const isDev = !app.isPackaged;
 function createWindow() {
+    const isDev = !app.isPackaged;
     const mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,

@@ -1,5 +1,6 @@
-import { contextBridge, ipcRenderer } from "electron";
+import pkg from "electron";
 import ENDPOINTS from "./config/index.js";
+const { contextBridge, ipcRenderer } = pkg;
 contextBridge.exposeInMainWorld(ENDPOINTS.api, {
     settings: {
         getData: (id) => ipcRenderer.invoke(ENDPOINTS.settings.getData, id),

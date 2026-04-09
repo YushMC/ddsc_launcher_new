@@ -1,8 +1,10 @@
-import { ipcMain } from "electron";
+import pkg from "electron";
 import modsRepository from "../api/mods.api.js";
 import settingsRepository from "../api/settings.api.js";
 import statisticsRepository from "../api/statistics.api.js";
 import ENDPOINTS from "../config/index.js";
+
+const { ipcMain } = pkg;
 
 export const BDpc = () => {
   /* endpoints para mods */

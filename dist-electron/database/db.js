@@ -1,7 +1,8 @@
 import Database from "better-sqlite3";
 import fs from "fs";
-import { app } from "electron";
+import pkg from "electron";
 import path from "path";
+const { app } = pkg;
 let dbInstance = null;
 let dbPath = "";
 /**
