@@ -1,4 +1,4 @@
-import initializeDatabase from "../database/index.js";
+import { getDatabase } from "../database/db.js";
 import { prepareQuery, returnObjetToResponseApi } from "../utils/querys.js";
 
 const AllStatisticsQuerys = {
@@ -11,17 +11,17 @@ const AllStatisticsQuerys = {
     "UPDATE statistics SET last_played_at = ? WHERE id = ?",
 };
 
-const { db } = initializeDatabase();
-
 const prepareQueryWraper = (query: string) => {
+  const db = getDatabase();
   if (!db) {
-    throw new Error("No se pudo conectar a la base de datos");
+    throw new Error("Base de datos no inicializada. Por favor, reinicia la aplicación.");
   }
 
   return prepareQuery(query, db);
 };
 
-const allQuerysPrepare = {
+// Preparar queries de forma lazy para evitar que se ejecuten antes de que la BD esté lista
+const getQuerysPrepare = () => ({
   selectDataStatisticsByID: prepareQueryWraper(
     AllStatisticsQuerys.getDataSettingById,
   ),
@@ -32,24 +32,27 @@ const allQuerysPrepare = {
   updateStatisticsLastPlayedAtByID: prepareQueryWraper(
     AllStatisticsQuerys.updateSettingLastPlayedAtById,
   ),
-} as const;
+});
 
 const statisticsRepository = {
   getDataStatisticsById(id: number): ApiResponseDB<any> {
     try {
-      const result = allQuerysPrepare.selectDataStatisticsByID.get({ id });
+      const queries = getQuerysPrepare();
+      const result = queries.selectDataStatisticsByID.get({ id });
 
       return !result
         ? returnObjetToResponseApi(false, "Estadística no encontrada")
         : returnObjetToResponseApi(true, "Estadística encontrada", result);
     } catch (error) {
+      console.error("Error in getDataStatisticsById:", error);
       return returnObjetToResponseApi(false, error);
     }
   },
 
   create(id_mod: number, id_user: number): ApiResponseDB<{ exist: boolean }> {
     try {
-      allQuerysPrepare.insertStatistics.run({
+      const queries = getQuerysPrepare();
+      queries.insertStatistics.run({
         id_mod,
         id_user,
         total_played: 0,
@@ -60,6 +63,7 @@ const statisticsRepository = {
         "Estadística agregada correctamente",
       );
     } catch (error: any) {
+      console.error("Error in create:", error);
       if (error instanceof Error && error.message.includes("UNIQUE")) {
         return {
           ...returnObjetToResponseApi(false, "La estadística ya existe"),
@@ -72,7 +76,8 @@ const statisticsRepository = {
 
   updateTotalPlayedById(id: number, total: string): ApiResponseDB {
     try {
-      const result = allQuerysPrepare.updateStatisticsTotalPlayedByID.run({
+      const queries = getQuerysPrepare();
+      const result = queries.updateStatisticsTotalPlayedByID.run({
         id,
         total_played: total,
       });
@@ -84,13 +89,15 @@ const statisticsRepository = {
             "No se encontró la estadística para actualizar",
           );
     } catch (error: any) {
+      console.error("Error in updateTotalPlayedById:", error);
       return returnObjetToResponseApi(false, error);
     }
   },
 
   updateLastPlayedAtById(id: number, date: string): ApiResponseDB {
     try {
-      const result = allQuerysPrepare.updateStatisticsLastPlayedAtByID.run({
+      const queries = getQuerysPrepare();
+      const result = queries.updateStatisticsLastPlayedAtByID.run({
         id,
         last_played_at: date,
       });
@@ -105,6 +112,7 @@ const statisticsRepository = {
             "No se encontró la estadística para actualizar",
           );
     } catch (error: any) {
+      console.error("Error in updateLastPlayedAtById:", error);
       return returnObjetToResponseApi(false, error);
     }
   },

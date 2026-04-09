@@ -3,7 +3,7 @@ import { Menu } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import { BDpc } from "./ipcs/index.js";
-import initializeDatabase from "./database/index.js";
+import { initializeDatabase, closeDatabase } from "./database/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,8 +30,23 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  initializeDatabase();
+  // Inicializar base de datos
+  const dbInit = initializeDatabase();
+  if (!dbInit.success) {
+    console.error("Failed to initialize database:", dbInit.message);
+  }
+
+  // Registrar IPC handlers
   BDpc();
+
+  // Crear ventana
   createWindow();
+
+  // Remover menu por defecto
   Menu.setApplicationMenu(null);
+});
+
+// Cerrar conexión de BD al cerrar app
+app.on("quit", () => {
+  closeDatabase();
 });
