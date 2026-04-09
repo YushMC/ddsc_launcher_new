@@ -1,0 +1,40 @@
+{
+  "name": "ddsc_launcher_new",
+  "private": true,
+  "type": "module",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck",
+    "dev:electron": "concurrently -k \"nuxt dev\" \"wait-on http://localhost:3000 && tsc -p electron && electron .\"",
+    "build:react": "vite build",
+    "build:electron": "tsc -p electron",
+    "build:app": "npm run build:react && npm run build:electron",
+    "dist": "npm run build:app && electron-builder"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.101",
+    "@iconify-json/simple-icons": "^1.2.77",
+    "@nuxt/image": "2.0.0",
+    "@nuxt/ui": "^4.6.1",
+    "better-sqlite3": "^12.8.0",
+    "fs": "0.0.1-security",
+    "nuxt": "^4.4.2",
+    "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.15.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "concurrently": "^9.2.1",
+    "electron": "^41.2.0",
+    "electron-builder": "^26.8.1",
+    "eslint": "^10.2.0",
+    "typescript": "^6.0.2",
+    "vue-tsc": "^3.2.6",
+    "wait-on": "^9.0.4"
+  },
+  "packageManager": "pnpm@10.33.0"
+}
