@@ -10,6 +10,7 @@
           width="50"
           height="50"
           class="object-cover cursor-pointer rounded-md"
+          @click="handleRunApp(mod)"
         />
       </UTooltip>
     </div>
@@ -17,12 +18,16 @@
 </template>
 
 <script setup lang="ts">
-const { checkFile, createDirectory } = useFilesApiElectron();
+import type { SystemName } from "~/types/systemData";
+
+const { checkFile, createDirectory, runFileMacOS, runFileWindows } =
+  useFilesApiElectron();
 const { getAllMods } = useModApiElectron();
-const { getIdUser, setDirectoryName } = useSO();
+const { getIdUser, setDirectoryName, getSystemOS } = useSO();
 const toast = useToast();
 
 const modsToPlay = ref<ModDBInterface[]>([]);
+const osName = ref<SystemName | null>(null);
 
 const directoryName = ref("user");
 const id_user = ref<number | null>(null);
@@ -57,8 +62,47 @@ const initializeUserDirectory = async () => {
   }
 };
 
+const handleRunApp = async (mod: ModDBInterface) => {
+  if (!osName.value) {
+    return;
+  }
+
+  let response;
+
+  switch (osName.value) {
+    case "Windows":
+      response = await runFileWindows(mod.path);
+      break;
+    case "MacOS":
+      response = await runFileMacOS(mod.path);
+      break;
+    default:
+      toast.add({
+        title: "Sistema operativo no soportado",
+        description: `Tu sistema operativo (${osName.value}) no es compatible con esta función.`,
+        color: "error",
+      });
+  }
+
+  if (response && !response.success) {
+    toast.add({
+      title: "Error al ejecutar el mod",
+      description: String(response.message),
+      color: "error",
+    });
+  }
+  if (response && response.success) {
+    toast.add({
+      title: "Mod ejecutado correctamente",
+      description: `El mod "${mod.name}" se ha ejecutado exitosamente.`,
+      color: "success",
+    });
+  }
+};
+
 onBeforeMount(async () => {
   await initializeUserDirectory();
+  osName.value = getSystemOS();
   const response = await getAllMods();
   if (response.success && response.data) {
     modsToPlay.value = response.data;

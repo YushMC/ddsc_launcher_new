@@ -5,6 +5,7 @@ import unzipper from "unzipper";
 import pkg from "electron";
 const { app, dialog } = pkg;
 import path from "path";
+import { exec } from "child_process";
 
 const userDataPath = app.getPath("userData");
 
@@ -292,8 +293,8 @@ const filesRepository = {
   /* Métodos para ejecutar aplicaciones o scripts */
   runAppMacOs: async (appPath: string): Promise<ApiResponseDB> => {
     try {
-      const { exec } = require("child_process");
-      exec(`open "${appPath}"`, (error: any) => {
+      const fullPath = path.join(userDataPath, appPath);
+      exec(`open "${fullPath}"`, (error: any) => {
         if (error) {
           console.error("Error in runAppMacOs:", error);
           return returnObjetToResponseApi(
@@ -319,8 +320,8 @@ const filesRepository = {
   },
   runAppWindows: async (appPath: string): Promise<ApiResponseDB> => {
     try {
-      const { exec } = require("child_process");
-      exec(`start "" "${appPath}"`, (error: any) => {
+      const fullPath = path.join(userDataPath, appPath);
+      exec(`start "" "${fullPath}"`, (error: any) => {
         if (error) {
           console.error("Error in runAppWindows:", error);
           return returnObjetToResponseApi(
@@ -346,8 +347,8 @@ const filesRepository = {
   },
   runShLinux: async (scriptPath: string): Promise<ApiResponseDB> => {
     try {
-      const { exec } = require("child_process");
-      exec(`sh "${scriptPath}"`, (error: any) => {
+      const fullPath = path.join(userDataPath, scriptPath);
+      exec(`sh "${fullPath}"`, (error: any) => {
         if (error) {
           console.error("Error in runShLinux:", error);
           return returnObjetToResponseApi(
