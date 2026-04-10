@@ -2,7 +2,7 @@ import { getDatabase } from "../database/db.js";
 import { prepareQuery, returnObjetToResponseApi } from "../utils/querys.js";
 
 const AllUsersQuerys = {
-  setUserData: "INSERT INTO users (username, is_developer, is_active) VALUES (?, ?, ?)",
+  setUserData: "INSERT INTO users (username, is_developer, is_active) VALUES (@username, @is_developer, @is_active)",
   getAllUsers: "SELECT * FROM users WHERE is_active = 1 ORDER BY id DESC",
   getUserDataById: "SELECT * FROM users WHERE id = ?",
   updateUserUsernameById: "UPDATE users SET username = ? WHERE id = ?",

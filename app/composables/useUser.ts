@@ -7,7 +7,7 @@ declare global {
           all: () => Promise<ApiResponseDB<UserInterface[]>>;
         };
         register: (
-          data: UserInterface,
+          username: string,
         ) => Promise<ApiResponseDB<{ exist: boolean }>>;
 
         update: {
@@ -22,7 +22,7 @@ const getAllUsers = async () => await window.api.users.get.all();
 const getUserByID = async (id: number) => await window.api.users.get.byID(id);
 
 const registerUser = async (username: string) =>
-  await window.api.users.register({ username } as UserInterface);
+  await window.api.users.register(username);
 
 const updateUsername = async (user: UserInterface) =>
   await window.api.users.update.username(user);
