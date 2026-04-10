@@ -47,7 +47,11 @@
                   <UFormField
                     label="Ruta del Archivo Zip (Mod)"
                     class="w-full"
-                    v-if="pathFileFolder.trim() === ''"
+                    v-if="
+                      pathFileFolder.trim() === '' &&
+                      getSystemOS() !== 'MacOS' &&
+                      getSystemOS() !== 'Linux'
+                    "
                   >
                     <div class="flex items-center gap-2 justify-start w-full">
                       <UInput
@@ -67,7 +71,10 @@
                   <USeparator
                     label="ó"
                     v-if="
-                      pathFileZip.trim() === '' && pathFileFolder.trim() === ''
+                      pathFileZip.trim() === '' &&
+                      pathFileFolder.trim() === '' &&
+                      getSystemOS() !== 'MacOS' &&
+                      getSystemOS() !== 'Linux'
                     "
                   />
                   <UFormField
@@ -120,6 +127,7 @@ const toast = useToast();
 const osName = ref<SystemName | null>(null);
 const { getSystemOS, getIdUser, getDirectoryName } = useSO();
 const { installModWithModeFolder, installModWithZipFile } = useInstallation();
+const { registerMod } = useModApiElectron();
 const modId = ref<number | undefined>(undefined);
 const itemsMods = ref<{ label: string; value: number }[]>([]);
 
@@ -263,60 +271,51 @@ const hanldeModeInstallation = async () => {
   });
   const installationToastId = installationToast.id;
 
-  if (pathFileZip.value.trim() !== "") {
-    const response = await installModWithZipFile(
-      selectedMod.resource.slug.replaceAll(/-/g, "_"),
-      baseDirectory,
-      pathFileZip.value,
-      osName.value,
-    );
+  const response =
+    pathFileZip.value.trim() !== ""
+      ? await installModWithZipFile(
+          selectedMod.resource.slug.replaceAll(/-/g, "_"),
+          baseDirectory,
+          pathFileZip.value,
+          osName.value,
+        )
+      : await installModWithModeFolder(
+          selectedMod.resource.slug.replaceAll(/-/g, "_"),
+          baseDirectory,
+          pathFileFolder.value,
+          osName.value,
+        );
 
-    if (response.success) {
-      toast.update(installationToastId, {
-        title: "Mod instalado",
-        description: `El mod "${selectedMod.resource.name}" se ha instalado correctamente.`,
-        icon: "i-lucide-check",
-        color: "success",
-        duration: 5000,
-      });
-    } else {
-      toast.update(installationToastId, {
+  if (response.success && response.finalPath) {
+    const registerResponse = await registerMod({
+      name: selectedMod.resource.name,
+      logo:
+        selectedMod.resource.images.find((img) => img.type === "logo")?.url ||
+        "",
+      main_image:
+        selectedMod.resource.images.find((img) => img.type === "main")?.url ||
+        "",
+      path: response.finalPath,
+    });
+
+    if (!registerResponse.success) {
+      toast.add({
         title: "Error",
-        description:
-          String(response.message) ||
-          `Hubo un error al instalar el mod "${selectedMod.resource.name}". Por favor, intenta nuevamente.`,
-        icon: "i-lucide-alert-circle",
+        description: `Error registering mod in database: ${registerResponse.message}`,
         color: "error",
-        duration: 5000,
-      });
-    }
-  } else if (pathFileFolder.value.trim() !== "") {
-    const response = await installModWithModeFolder(
-      selectedMod.resource.slug.replaceAll(/-/g, "_"),
-      baseDirectory,
-      pathFileFolder.value,
-      osName.value,
-    );
-    if (response.success) {
-      toast.update(installationToastId, {
-        title: "Mod instalado",
-        description: `El mod "${selectedMod.resource.name}" se ha instalado correctamente.`,
-        icon: "i-lucide-check",
-        color: "success",
-        duration: 5000,
-      });
-    } else {
-      toast.update(installationToastId, {
-        title: "Error",
-        description:
-          String(response.message) ||
-          `Hubo un error al instalar el mod "${selectedMod.resource.name}". Por favor, intenta nuevamente.`,
-        icon: "i-lucide-alert-circle",
-        color: "error",
-        duration: 5000,
       });
     }
   }
+
+  toast.update(installationToastId, {
+    title: response.success ? "Mod instalado" : "Error",
+    description: response.success
+      ? `El mod "${selectedMod.resource.name}" se ha instalado correctamente.`
+      : `Hubo un error al instalar el mod "${selectedMod.resource.name}". Por favor, intenta nuevamente.`,
+    icon: response.success ? "i-lucide-check" : "i-lucide-alert-circle",
+    color: response.success ? "success" : "error",
+    duration: 5000,
+  });
 };
 
 onBeforeMount(async () => {

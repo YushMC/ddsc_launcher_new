@@ -13,6 +13,9 @@ export const BDpc = () => {
     ipcMain.handle(ENDPOINTS.mods.get.all, () => {
         return modsRepository.getAllDataMods();
     });
+    ipcMain.handle(ENDPOINTS.mods.register, (_, data) => {
+        return modsRepository.create(data);
+    });
     ipcMain.handle(ENDPOINTS.mods.update, (_, data) => {
         return modsRepository.update(data);
     });

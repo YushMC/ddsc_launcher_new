@@ -141,6 +141,14 @@ const installModWithZipFile = async (
   return {
     success: true,
     message: "Mod installed successfully.",
+    finalPath:
+      osName === "MacOS"
+        ? await window.api.files.joinPaths(
+            modFolder.path,
+            "ddlc-mac",
+            "DDLC.app",
+          )
+        : modFolder.path,
   };
 };
 
@@ -214,9 +222,14 @@ const installModWithModeFolder = async (
       message: `Error copying files: ${copyResponse.message}`,
     };
   }
+  const finalPath =
+    osName === "MacOS"
+      ? await window.api.files.joinPaths(modFolder.path, "ddlc-mac", "DDLC.app")
+      : modFolder.path;
   return {
     success: true,
     message: "Mod installed successfully.",
+    finalPath,
   };
 };
 

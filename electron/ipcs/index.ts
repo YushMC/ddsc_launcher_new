@@ -20,6 +20,13 @@ export const BDpc = () => {
   });
 
   ipcMain.handle(
+    ENDPOINTS.mods.register,
+    (_, data: ModInterface): ApiResponseDB<{ exist: boolean }> => {
+      return modsRepository.create(data);
+    },
+  );
+
+  ipcMain.handle(
     ENDPOINTS.mods.update,
     (_, data: ModInterface): ApiResponseDB => {
       return modsRepository.update(data);

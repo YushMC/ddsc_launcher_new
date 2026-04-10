@@ -2,6 +2,8 @@ interface Window {
   api: {
     files: FilesApi;
     users: UsersApi;
+    mods: ModsApi;
+    statistics: StatisticsApi;
   };
 }
 
@@ -47,5 +49,32 @@ interface UsersApi {
 
   update: {
     username: (data: UserInterface) => Promise<ApiResponseDB>;
+  };
+}
+
+interface ModsApi {
+  register: (data: ModDBInterface) => Promise<ApiResponseDB>;
+  get: {
+    all: () => Promise<ApiResponseDB<ModDBInterface[]>>;
+    id: (id: number) => Promise<ApiResponseDB<ModDBInterface>>;
+  };
+  update: (id: number, data: Partial<ModDBInterface>) => Promise<ApiResponseDB>;
+  delete: (id: number) => Promise<ApiResponseDB>;
+}
+
+interface StatisticsApi {
+  get: {
+    byID: (id: number) => Promise<ApiResponseDB<StatisticsInterface>>;
+  };
+  register: (data: StatisticsInterface) => Promise<ApiResponseDB>;
+  update: {
+    total_played_by_id: (
+      id: number,
+      total_played: number,
+    ) => Promise<ApiResponseDB>;
+    last_played_at_by_id: (
+      id: number,
+      last_played_at: string,
+    ) => Promise<ApiResponseDB>;
   };
 }
