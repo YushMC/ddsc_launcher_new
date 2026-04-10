@@ -1,10 +1,10 @@
 import { getDatabase } from "../database/db.js";
 import { prepareQuery, returnObjetToResponseApi } from "../utils/querys.js";
 const AllStatisticsQuerys = {
-    setSettingData: "INSERT INTO statistics (id_mod, id_user, total_played, last_played_at) VALUES (?, ?, ?, ?)",
+    setSettingData: "INSERT INTO statistics (id_mod, id_user, total_played, last_played_at) VALUES (@id_mod, @id_user, @total_played, @last_played_at)",
     getDataSettingById: "SELECT * FROM statistics WHERE id = ?",
-    updateSettingTotalPlayedById: "UPDATE statistics SET total_played = ? WHERE id = ?",
-    updateSettingLastPlayedAtById: "UPDATE statistics SET last_played_at = ? WHERE id = ?",
+    updateSettingTotalPlayedById: "UPDATE statistics SET total_played = @total_played WHERE id = @id",
+    updateSettingLastPlayedAtById: "UPDATE statistics SET last_played_at = @last_played_at WHERE id = @id",
 };
 const prepareQueryWraper = (query) => {
     const db = getDatabase();

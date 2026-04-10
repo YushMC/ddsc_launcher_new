@@ -4,8 +4,8 @@ const AllUsersQuerys = {
     setUserData: "INSERT INTO users (username, is_developer, is_active) VALUES (@username, @is_developer, @is_active)",
     getAllUsers: "SELECT * FROM users WHERE is_active = 1 ORDER BY id DESC",
     getUserDataById: "SELECT * FROM users WHERE id = ?",
-    updateUserUsernameById: "UPDATE users SET username = ? WHERE id = ?",
-    updateUserDeveloperModeById: "UPDATE users SET is_developer = ? WHERE id = ?",
+    updateUserUsernameById: "UPDATE users SET username = @username WHERE id = @id",
+    updateUserDeveloperModeById: "UPDATE users SET is_developer = @developer_mode WHERE id = @id",
 };
 const prepareQueryWraper = (query) => {
     const db = getDatabase();

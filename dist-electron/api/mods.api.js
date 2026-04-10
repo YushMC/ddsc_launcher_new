@@ -1,11 +1,11 @@
 import { getDatabase } from "../database/db.js";
 import { prepareQuery, returnObjetToResponseApi } from "../utils/querys.js";
 const AllModsQuerys = {
-    setModData: "INSERT INTO mods (name, logo, main_image, path) VALUES (?, ?, ?, ?)",
+    setModData: "INSERT INTO mods (name, logo, main_image, path) VALUES (@name, @logo, @main_image, @path)",
     getDataModById: "SELECT * FROM mods WHERE id = ?",
     getAllDataMods: "SELECT * FROM mods WHERE is_active = 1",
-    updateModDataById: "UPDATE mods SET name = ?, logo = ?, main_image = ?, path = ?, is_custom = ? WHERE id = ?",
-    deleteModById: "UPDATE mods SET is_active = 0 WHERE id = ?",
+    updateModDataById: "UPDATE mods SET name = @name, logo = @logo, main_image = @main_image, path = @path, is_custom = @is_custom WHERE id = @id",
+    deleteModById: "UPDATE mods SET is_active = 0 WHERE id = @id",
 };
 const prepareQueryWraper = (query) => {
     const db = getDatabase();
