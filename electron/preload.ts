@@ -82,13 +82,13 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
       ipcRenderer.invoke(ENDPOINTS.files.joinPaths, ...paths),
     copy: {
       file: (source: string, destination: string): Promise<ApiResponseDB> =>
-        ipcRenderer.invoke(ENDPOINTS.files.copy.file, source, destination),
+        ipcRenderer.invoke(ENDPOINTS.files.copy.file, { source, destination }),
 
       directory: (
         source: string,
         destination: string,
       ): Promise<ApiResponseDB> =>
-        ipcRenderer.invoke(ENDPOINTS.files.copy.directory, source, destination),
+        ipcRenderer.invoke(ENDPOINTS.files.copy.directory, { source, destination }),
     },
     create: {
       directory: (path: string): Promise<ApiResponseDB> =>
@@ -106,7 +106,7 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
     },
     unzip: {
       file: (zipPath: string, extractTo: string): Promise<ApiResponseDB> =>
-        ipcRenderer.invoke(ENDPOINTS.files.unzip.file, zipPath, extractTo),
+        ipcRenderer.invoke(ENDPOINTS.files.unzip.file, { zipPath, extractTo }),
     },
     run: {
       macos: (filePath: string): Promise<ApiResponseDB> =>

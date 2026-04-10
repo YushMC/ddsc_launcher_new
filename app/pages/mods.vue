@@ -259,22 +259,13 @@ const hanldeModeInstallation = async () => {
     description: `Se está instalando el mod "${selectedMod.resource.name}". Por favor, espera...`,
     color: "info",
     icon: "i-lucide-loader",
-    timeout: false, // No se cierra automáticamente
-    closeButton: {
-      icon: "i-lucide-x",
-      color: "gray",
-      variant: "ghost",
-      padded: false,
-      ui: {
-        base: "h-5 w-5 flex-shrink-0 cursor-not-allowed opacity-50",
-      },
-    },
+    duration: 200000, // No se cierra automáticamente
   });
   const installationToastId = installationToast.id;
 
   if (pathFileZip.value.trim() !== "") {
     const response = await installModWithZipFile(
-      selectedMod.resource.name,
+      selectedMod.resource.slug.replaceAll(/-/g, "_"),
       baseDirectory,
       pathFileZip.value,
       osName.value,
@@ -286,20 +277,22 @@ const hanldeModeInstallation = async () => {
         description: `El mod "${selectedMod.resource.name}" se ha instalado correctamente.`,
         icon: "i-lucide-check",
         color: "success",
-        timeout: 5000,
+        duration: 5000,
       });
     } else {
       toast.update(installationToastId, {
         title: "Error",
-        description: `Hubo un error al instalar el mod "${selectedMod.resource.name}". Por favor, intenta nuevamente.`,
+        description:
+          String(response.message) ||
+          `Hubo un error al instalar el mod "${selectedMod.resource.name}". Por favor, intenta nuevamente.`,
         icon: "i-lucide-alert-circle",
         color: "error",
-        timeout: 5000,
+        duration: 5000,
       });
     }
   } else if (pathFileFolder.value.trim() !== "") {
     const response = await installModWithModeFolder(
-      selectedMod.resource.name,
+      selectedMod.resource.slug.replaceAll(/-/g, "_"),
       baseDirectory,
       pathFileFolder.value,
       osName.value,
@@ -310,15 +303,17 @@ const hanldeModeInstallation = async () => {
         description: `El mod "${selectedMod.resource.name}" se ha instalado correctamente.`,
         icon: "i-lucide-check",
         color: "success",
-        timeout: 5000,
+        duration: 5000,
       });
     } else {
       toast.update(installationToastId, {
         title: "Error",
-        description: `Hubo un error al instalar el mod "${selectedMod.resource.name}". Por favor, intenta nuevamente.`,
+        description:
+          String(response.message) ||
+          `Hubo un error al instalar el mod "${selectedMod.resource.name}". Por favor, intenta nuevamente.`,
         icon: "i-lucide-alert-circle",
         color: "error",
-        timeout: 5000,
+        duration: 5000,
       });
     }
   }

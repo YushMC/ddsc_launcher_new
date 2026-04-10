@@ -1,7 +1,10 @@
 import type { SystemName } from "~/types/systemData";
 
 const createModDirectory = async (modName: string, baseDirectory: string) => {
-  const directoryName = await window.api.files.joinPaths(baseDirectory, `mod_${modName}`);
+  const directoryName = await window.api.files.joinPaths(
+    baseDirectory,
+    `mod_${modName}`,
+  );
 
   try {
     const checkResponse = await window.api.files.check(directoryName);
@@ -148,6 +151,23 @@ const installModWithModeFolder = async (
       message: "Mod directory path is not available.",
     };
   }
+
+  const DDLCFilesPath = await window.api.files.joinPaths(
+    baseDirectory,
+    osName === "MacOS" ? "ddlc-mac" : "",
+  );
+
+  const copyDDLCResponse = await copyDirectoryFiles(
+    DDLCFilesPath,
+    modFolder.path,
+  );
+  if (!copyDDLCResponse.success) {
+    return {
+      success: false,
+      message: `Error copying DDLC files: ${copyDDLCResponse.message}`,
+    };
+  }
+
   let pathToDestino = modFolder.path;
   if (osName === "MacOS") {
     pathToDestino = await window.api.files.joinPaths(

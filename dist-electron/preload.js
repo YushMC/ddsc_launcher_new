@@ -32,8 +32,8 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
         check: (path) => ipcRenderer.invoke(ENDPOINTS.files.check, path),
         joinPaths: (...paths) => ipcRenderer.invoke(ENDPOINTS.files.joinPaths, ...paths),
         copy: {
-            file: (source, destination) => ipcRenderer.invoke(ENDPOINTS.files.copy.file, source, destination),
-            directory: (source, destination) => ipcRenderer.invoke(ENDPOINTS.files.copy.directory, source, destination),
+            file: (source, destination) => ipcRenderer.invoke(ENDPOINTS.files.copy.file, { source, destination }),
+            directory: (source, destination) => ipcRenderer.invoke(ENDPOINTS.files.copy.directory, { source, destination }),
         },
         create: {
             directory: (path) => ipcRenderer.invoke(ENDPOINTS.files.create.directory, path),
@@ -45,7 +45,7 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
             zipOrFolder: () => ipcRenderer.invoke(ENDPOINTS.files.select.zipOrFolder),
         },
         unzip: {
-            file: (zipPath, extractTo) => ipcRenderer.invoke(ENDPOINTS.files.unzip.file, zipPath, extractTo),
+            file: (zipPath, extractTo) => ipcRenderer.invoke(ENDPOINTS.files.unzip.file, { zipPath, extractTo }),
         },
         run: {
             macos: (filePath) => ipcRenderer.invoke(ENDPOINTS.files.run.macos, filePath),
