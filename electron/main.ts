@@ -1,7 +1,7 @@
 import pkg from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
-import { BDpc } from "./ipcs/index.js";
+import { BDpc, Filespc } from "./ipcs/index.js";
 import { initializeDatabase, closeDatabase } from "./database/db.js";
 
 const { app, BrowserWindow, Menu } = pkg;
@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 
 function createWindow() {
   const isDev = !app.isPackaged;
-  
+
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -40,6 +40,7 @@ app.whenReady().then(() => {
 
   // Registrar IPC handlers
   BDpc();
+  Filespc();
 
   // Crear ventana
   createWindow();

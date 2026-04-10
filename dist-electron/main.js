@@ -1,7 +1,7 @@
 import pkg from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
-import { BDpc } from "./ipcs/index.js";
+import { BDpc, Filespc } from "./ipcs/index.js";
 import { initializeDatabase, closeDatabase } from "./database/db.js";
 const { app, BrowserWindow, Menu } = pkg;
 const __filename = fileURLToPath(import.meta.url);
@@ -34,6 +34,7 @@ app.whenReady().then(() => {
     }
     // Registrar IPC handlers
     BDpc();
+    Filespc();
     // Crear ventana
     createWindow();
     // Remover menu por defecto

@@ -1,7 +1,10 @@
 const ENDPOINTS = {
     api: "api",
-    settings: {
-        getData: "settings/data/id",
+    users: {
+        get: {
+            byID: "settings/data/id",
+            all: "settings/data/all",
+        },
         register: "settings/register",
         update: {
             username: "settings/update/username",
@@ -25,6 +28,24 @@ const ENDPOINTS = {
         update: {
             total_played_by_id: "statistics/update/total_played/id",
             last_played_at_by_id: "statistics/update/last_played_at/id",
+        },
+    },
+    files: {
+        check: "files/check",
+        copy: {
+            file: "files/copy/file",
+            directory: "files/copy/directory",
+        },
+        create: {
+            directory: "files/create/directory",
+        },
+        unzip: {
+            file: "files/unzip/file",
+        },
+        run: {
+            macos: "files/run/macos",
+            windows: "files/run/windows",
+            linux: "files/run/linux",
         },
     },
 };

@@ -1,7 +1,8 @@
 import pkg from "electron";
 import modsRepository from "../api/mods.api.js";
-import settingsRepository from "../api/settings.api.js";
+import usersRepository from "../api/users.api.js";
 import statisticsRepository from "../api/statistics.api.js";
+import filesRepository from "../api/files.api.js";
 import ENDPOINTS from "../config/index.js";
 
 const { ipcMain } = pkg;
@@ -28,30 +29,38 @@ export const BDpc = () => {
     return modsRepository.delete(id);
   });
 
-  /* endpoints para ajustes*/
+  /* endpoints para usuarios*/
   ipcMain.handle(
-    ENDPOINTS.settings.getData,
-    (_, id: number): ApiResponseDB<SettingsInterface> => {
-      return settingsRepository.getDataSettingById(id);
-    },
-  );
-  ipcMain.handle(
-    ENDPOINTS.settings.register,
-    (_, data: SettingsInterface): ApiResponseDB<any> => {
-      return settingsRepository.create(data);
-    },
-  );
-  ipcMain.handle(
-    ENDPOINTS.settings.update.username,
-    (_, data: SettingsInterface): ApiResponseDB => {
-      return settingsRepository.updateUsername(data);
+    ENDPOINTS.users.get.byID,
+    (_, id: number): ApiResponseDB<UserInterface> => {
+      return usersRepository.getById(id);
     },
   );
 
   ipcMain.handle(
-    ENDPOINTS.settings.update.developer_mode,
-    (_, data: SettingsInterface): ApiResponseDB => {
-      return settingsRepository.updateDeveloperMode(data);
+    ENDPOINTS.users.get.all,
+    (): ApiResponseDB<UserInterface[]> => {
+      return usersRepository.getAll();
+    },
+  );
+
+  ipcMain.handle(
+    ENDPOINTS.users.register,
+    (_, data: UserInterface): ApiResponseDB<any> => {
+      return usersRepository.create(data);
+    },
+  );
+  ipcMain.handle(
+    ENDPOINTS.users.update.username,
+    (_, data: UserInterface): ApiResponseDB => {
+      return usersRepository.updateUsername(data);
+    },
+  );
+
+  ipcMain.handle(
+    ENDPOINTS.users.update.developer_mode,
+    (_, data: UserInterface): ApiResponseDB => {
+      return usersRepository.updateDeveloperMode(data);
     },
   );
 
@@ -84,6 +93,77 @@ export const BDpc = () => {
         data.id,
         data.last_played_at,
       );
+    },
+  );
+};
+
+export const Filespc = () => {
+  /* endpoints para archivos */
+  ipcMain.handle(
+    ENDPOINTS.files.check,
+    async (_, filePath: string): Promise<ApiResponseDB<boolean>> => {
+      return await filesRepository.checkDirectoryExists(filePath);
+    },
+  );
+
+  ipcMain.handle(
+    ENDPOINTS.files.create.directory,
+    async (_, pathTemp: string): Promise<ApiResponseDB> => {
+      return await filesRepository.createDirectory(pathTemp);
+    },
+  );
+
+  ipcMain.handle(
+    ENDPOINTS.files.copy.directory,
+    async (
+      _,
+      data: { source: string; destination: string },
+    ): Promise<ApiResponseDB> => {
+      return await filesRepository.copyDirectory(data.source, data.destination);
+    },
+  );
+
+  ipcMain.handle(
+    ENDPOINTS.files.copy.file,
+    async (
+      _,
+      data: { source: string; destination: string },
+    ): Promise<ApiResponseDB> => {
+      return await filesRepository.copyFile(data.source, data.destination);
+    },
+  );
+  /* endpoint para descomprimir archivos */
+
+  ipcMain.handle(
+    ENDPOINTS.files.unzip.file,
+    async (
+      _,
+      data: { zipPath: string; extractTo: string },
+    ): Promise<ApiResponseDB> => {
+      return await filesRepository.unzipFile(data.zipPath, data.extractTo);
+    },
+  );
+
+  /* endpoints para ejecutar archivos */
+
+  ipcMain.handle(
+    ENDPOINTS.files.run.macos,
+    async (_, filePath: string): Promise<ApiResponseDB> => {
+      return await filesRepository.runAppMacOs(filePath);
+    },
+  );
+
+  ipcMain.handle(
+    ENDPOINTS.files.run.windows,
+    async (_, filePath: string): Promise<ApiResponseDB> => {
+      return await filesRepository.runAppWindows(filePath);
+    },
+  );
+
+  ipcMain.handle(
+    ENDPOINTS.files.run.linux,
+    async (_, filePath: string): Promise<ApiResponseDB> => {
+      return await filesRepository.runShLinux(filePath);
     },
   );
 };

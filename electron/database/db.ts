@@ -21,7 +21,9 @@ export const initializeDatabase = (): {
   try {
     // Si ya existe instancia, retornarla
     if (dbInstance) {
-      console.log("Database instance already exists, returning cached instance");
+      console.log(
+        "Database instance already exists, returning cached instance",
+      );
       return {
         success: true,
         message: "Database already initialized",
@@ -32,23 +34,18 @@ export const initializeDatabase = (): {
 
     // Crear directorio si no existe
     const userDataPath = app.getPath("userData");
-    console.log("User data path:", userDataPath);
 
     if (!fs.existsSync(userDataPath)) {
       fs.mkdirSync(userDataPath, { recursive: true });
-      console.log("Created user data directory");
     }
 
     // Crear instancia de BD
     dbPath = path.join(userDataPath, "app_ddsc_launcher.db");
-    console.log("Database path:", dbPath);
 
     dbInstance = new Database(dbPath);
-    console.log("Database instance created successfully");
 
     // Habilitar foreign keys
     dbInstance.pragma("foreign_keys = ON");
-    console.log("Foreign keys pragma enabled");
 
     // Crear tablas
     dbInstance.exec(`
@@ -91,8 +88,6 @@ export const initializeDatabase = (): {
       CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
     `);
 
-    console.log("Database tables created successfully");
-
     return {
       success: true,
       message: "Base de datos local inicializada y tablas creadas exitosamente",
@@ -100,7 +95,6 @@ export const initializeDatabase = (): {
       path: dbPath,
     };
   } catch (error) {
-    console.error("Database initialization error:", error);
     return {
       success: false,
       message: `Error al crear las tablas en la base de datos local: ${error}`,
@@ -117,7 +111,7 @@ export const initializeDatabase = (): {
 export const getDatabase = (): Database.Database | null => {
   if (!dbInstance) {
     console.warn(
-      "Database instance not initialized. Call initializeDatabase() first."
+      "Database instance not initialized. Call initializeDatabase() first.",
     );
     return null;
   }

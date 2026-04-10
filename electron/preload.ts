@@ -4,20 +4,25 @@ import ENDPOINTS from "./config/index.js";
 const { contextBridge, ipcRenderer } = pkg;
 
 contextBridge.exposeInMainWorld(ENDPOINTS.api, {
-  settings: {
-    getData: (id: number): Promise<ApiResponseDB<SettingsInterface>> =>
-      ipcRenderer.invoke(ENDPOINTS.settings.getData, id),
+  users: {
+    get: {
+      byID: (id: number): Promise<ApiResponseDB<UserInterface>> =>
+        ipcRenderer.invoke(ENDPOINTS.users.get.byID, id),
 
-    register: (data: SettingsInterface): Promise<ApiResponseDB> =>
-      ipcRenderer.invoke(ENDPOINTS.settings.register, data),
+      all: (): Promise<ApiResponseDB<UserInterface[]>> =>
+        ipcRenderer.invoke(ENDPOINTS.users.get.all),
+    },
+
+    register: (data: UserInterface): Promise<ApiResponseDB> =>
+      ipcRenderer.invoke(ENDPOINTS.users.register, data),
 
     update: {
       username: (username: string): Promise<ApiResponseDB> =>
-        ipcRenderer.invoke(ENDPOINTS.settings.update.username, username),
+        ipcRenderer.invoke(ENDPOINTS.users.update.username, username),
 
       developerMode: (developerMode: boolean): Promise<ApiResponseDB> =>
         ipcRenderer.invoke(
-          ENDPOINTS.settings.update.developer_mode,
+          ENDPOINTS.users.update.developer_mode,
           developerMode,
         ),
     },
@@ -67,6 +72,39 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
           ENDPOINTS.statistics.update.last_played_at_by_id,
           data,
         ),
+    },
+  },
+
+  files: {
+    check: (path: string): Promise<ApiResponseDB> =>
+      ipcRenderer.invoke(ENDPOINTS.files.check, path),
+    copy: {
+      file: (source: string, destination: string): Promise<ApiResponseDB> =>
+        ipcRenderer.invoke(ENDPOINTS.files.copy.file, source, destination),
+
+      directory: (
+        source: string,
+        destination: string,
+      ): Promise<ApiResponseDB> =>
+        ipcRenderer.invoke(ENDPOINTS.files.copy.directory, source, destination),
+    },
+    create: {
+      directory: (path: string): Promise<ApiResponseDB> =>
+        ipcRenderer.invoke(ENDPOINTS.files.create.directory, path),
+    },
+    unzip: {
+      file: (zipPath: string, extractTo: string): Promise<ApiResponseDB> =>
+        ipcRenderer.invoke(ENDPOINTS.files.unzip.file, zipPath, extractTo),
+    },
+    run: {
+      macos: (filePath: string): Promise<ApiResponseDB> =>
+        ipcRenderer.invoke(ENDPOINTS.files.run.macos, filePath),
+
+      windows: (filePath: string): Promise<ApiResponseDB> =>
+        ipcRenderer.invoke(ENDPOINTS.files.run.windows, filePath),
+
+      linux: (filePath: string): Promise<ApiResponseDB> =>
+        ipcRenderer.invoke(ENDPOINTS.files.run.linux, filePath),
     },
   },
 });

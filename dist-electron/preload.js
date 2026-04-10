@@ -2,12 +2,15 @@ import pkg from "electron";
 import ENDPOINTS from "./config/index.js";
 const { contextBridge, ipcRenderer } = pkg;
 contextBridge.exposeInMainWorld(ENDPOINTS.api, {
-    settings: {
-        getData: (id) => ipcRenderer.invoke(ENDPOINTS.settings.getData, id),
-        register: (data) => ipcRenderer.invoke(ENDPOINTS.settings.register, data),
+    users: {
+        get: {
+            byID: (id) => ipcRenderer.invoke(ENDPOINTS.users.get.byID, id),
+            all: () => ipcRenderer.invoke(ENDPOINTS.users.get.all),
+        },
+        register: (data) => ipcRenderer.invoke(ENDPOINTS.users.register, data),
         update: {
-            username: (username) => ipcRenderer.invoke(ENDPOINTS.settings.update.username, username),
-            developerMode: (developerMode) => ipcRenderer.invoke(ENDPOINTS.settings.update.developer_mode, developerMode),
+            username: (username) => ipcRenderer.invoke(ENDPOINTS.users.update.username, username),
+            developerMode: (developerMode) => ipcRenderer.invoke(ENDPOINTS.users.update.developer_mode, developerMode),
         },
     },
     mods: {
@@ -23,6 +26,24 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
         update: {
             totalPlayedByID: (data) => ipcRenderer.invoke(ENDPOINTS.statistics.update.total_played_by_id, data),
             lastPlayedAtByID: (data) => ipcRenderer.invoke(ENDPOINTS.statistics.update.last_played_at_by_id, data),
+        },
+    },
+    files: {
+        check: (path) => ipcRenderer.invoke(ENDPOINTS.files.check, path),
+        copy: {
+            file: (source, destination) => ipcRenderer.invoke(ENDPOINTS.files.copy.file, source, destination),
+            directory: (source, destination) => ipcRenderer.invoke(ENDPOINTS.files.copy.directory, source, destination),
+        },
+        create: {
+            directory: (path) => ipcRenderer.invoke(ENDPOINTS.files.create.directory, path),
+        },
+        unzip: {
+            file: (zipPath, extractTo) => ipcRenderer.invoke(ENDPOINTS.files.unzip.file, zipPath, extractTo),
+        },
+        run: {
+            macos: (filePath) => ipcRenderer.invoke(ENDPOINTS.files.run.macos, filePath),
+            windows: (filePath) => ipcRenderer.invoke(ENDPOINTS.files.run.windows, filePath),
+            linux: (filePath) => ipcRenderer.invoke(ENDPOINTS.files.run.linux, filePath),
         },
     },
 });

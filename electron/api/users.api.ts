@@ -1,18 +1,20 @@
 import { getDatabase } from "../database/db.js";
 import { prepareQuery, returnObjetToResponseApi } from "../utils/querys.js";
 
-const AllSettingsQuerys = {
-  setSettingData: "INSERT INTO users (username) VALUES (?)",
-  getDataSettingById: "SELECT * FROM users WHERE id = ?",
-  updateSettingUsernameById: "UPDATE users SET username = ? WHERE id = ?",
-  updateSettingDeveloperModeById:
-    "UPDATE users SET is_developer = ? WHERE id = ?",
+const AllUsersQuerys = {
+  setUserData: "INSERT INTO users (username, path_launcher, is_developer, is_active) VALUES (?, ?, ?, ?)",
+  getAllUsers: "SELECT * FROM users WHERE is_active = 1 ORDER BY id DESC",
+  getUserDataById: "SELECT * FROM users WHERE id = ?",
+  updateUserUsernameById: "UPDATE users SET username = ? WHERE id = ?",
+  updateUserDeveloperModeById: "UPDATE users SET is_developer = ? WHERE id = ?",
 };
 
 const prepareQueryWraper = (query: string) => {
   const db = getDatabase();
   if (!db) {
-    throw new Error("Base de datos no inicializada. Por favor, reinicia la aplicación.");
+    throw new Error(
+      "Base de datos no inicializada. Por favor, reinicia la aplicación.",
+    );
   }
 
   return prepareQuery(query, db);
@@ -20,38 +22,50 @@ const prepareQueryWraper = (query: string) => {
 
 // Preparar queries de forma lazy para evitar que se ejecuten antes de que la BD esté lista
 const getQuerysPrepare = () => ({
-  selectDataSettingByID: prepareQueryWraper(
-    AllSettingsQuerys.getDataSettingById,
-  ),
-  insertSetting: prepareQueryWraper(AllSettingsQuerys.setSettingData),
-  updateSettingUsernameByID: prepareQueryWraper(
-    AllSettingsQuerys.updateSettingUsernameById,
-  ),
-  updateSettingDeveloperModeByID: prepareQueryWraper(
-    AllSettingsQuerys.updateSettingDeveloperModeById,
+  selectDataUserByID: prepareQueryWraper(AllUsersQuerys.getUserDataById),
+  selectData: prepareQueryWraper(AllUsersQuerys.getAllUsers),
+  insertUser: prepareQueryWraper(AllUsersQuerys.setUserData),
+  updateUsernameByID: prepareQueryWraper(AllUsersQuerys.updateUserUsernameById),
+  updateDeveloperModeByID: prepareQueryWraper(
+    AllUsersQuerys.updateUserDeveloperModeById,
   ),
 });
 
-const settingsRepository = {
-  getDataSettingById(id: number): ApiResponseDB<any> {
+const usersRepository = {
+  getById(id: number): ApiResponseDB<any> {
     try {
       const queries = getQuerysPrepare();
-      const result = queries.selectDataSettingByID.get({ id });
+      const result = queries.selectDataUserByID.get({ id });
 
       return !result
         ? returnObjetToResponseApi(false, "Usuario no encontrado")
         : returnObjetToResponseApi(true, "Usuario encontrado", result);
     } catch (error) {
-      console.error("Error in getDataSettingById:", error);
+      console.error("Error in getById:", error);
       return returnObjetToResponseApi(false, error);
     }
   },
 
-  create(data: SettingsInterface): ApiResponseDB<{ exist: boolean }> {
+  getAll(): ApiResponseDB<any> {
     try {
       const queries = getQuerysPrepare();
-      queries.insertSetting.run({
+      const result = queries.selectData.all();
+
+      return returnObjetToResponseApi(true, "Usuarios obtenidos", result);
+    } catch (error) {
+      console.error("Error in getAll:", error);
+      return returnObjetToResponseApi(false, error);
+    }
+  },
+
+  create(data: UserInterface): ApiResponseDB<{ exist: boolean }> {
+    try {
+      const queries = getQuerysPrepare();
+      queries.insertUser.run({
         username: data.username,
+        path_launcher: data.path_launcher,
+        is_developer: data.developer_mode ? 1 : 0,
+        is_active: data.is_active ? 1 : 0,
       });
       return returnObjetToResponseApi(true, "Usuario agregado correctamente");
     } catch (error: any) {
@@ -66,10 +80,10 @@ const settingsRepository = {
     }
   },
 
-  updateUsername(data: SettingsInterface): ApiResponseDB {
+  updateUsername(data: UserInterface): ApiResponseDB {
     try {
       const queries = getQuerysPrepare();
-      const result = queries.updateSettingUsernameByID.run({
+      const result = queries.updateUsernameByID.run({
         username: data.username,
         id: data.id,
       });
@@ -86,10 +100,10 @@ const settingsRepository = {
     }
   },
 
-  updateDeveloperMode(data: SettingsInterface): ApiResponseDB {
+  updateDeveloperMode(data: UserInterface): ApiResponseDB {
     try {
       const queries = getQuerysPrepare();
-      const result = queries.updateSettingDeveloperModeByID.run({
+      const result = queries.updateDeveloperModeByID.run({
         developer_mode: data.developer_mode,
         id: data.id,
       });
@@ -110,4 +124,4 @@ const settingsRepository = {
   },
 };
 
-export default settingsRepository;
+export default usersRepository;
