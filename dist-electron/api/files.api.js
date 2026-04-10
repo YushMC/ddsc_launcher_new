@@ -36,6 +36,7 @@ const filesRepository = {
         try {
             await fs.cp(path.normalize(source), path.join(userDataPath, destination), {
                 recursive: true,
+                force: true,
             });
             return returnObjetToResponseApi(true, "Directorio copiado exitosamente", null);
         }
@@ -46,7 +47,11 @@ const filesRepository = {
     },
     copyFile: async (source, destination) => {
         try {
-            await fs.copyFile(path.normalize(source), path.join(userDataPath, destination));
+            const normalizedSource = path.normalize(source);
+            const destinationPath = path.join(userDataPath, destination);
+            await fs.mkdir(path.dirname(destinationPath), { recursive: true });
+            await fs.rm(destinationPath, { force: true });
+            await fs.copyFile(normalizedSource, destinationPath);
             return returnObjetToResponseApi(true, "Archivo copiado exitosamente", null);
         }
         catch (error) {

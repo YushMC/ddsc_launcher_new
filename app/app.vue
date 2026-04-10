@@ -12,17 +12,18 @@ function getOS(): SystemName | null {
 
   return null;
 }
-
-try {
-  const os = getOS();
-  if (!os) {
-    console.warn("Unsupported OS detected. Defaulting to Windows.");
-  } else {
-    setSystemOS(os);
+onBeforeMount(() => {
+  try {
+    const os = getOS();
+    if (!os) {
+      console.warn("Unsupported OS detected. Defaulting to Windows.");
+    } else {
+      setSystemOS(os);
+    }
+  } catch (error) {
+    console.error("Error detecting OS:", error);
   }
-} catch (error) {
-  console.error("Error detecting OS:", error);
-}
+});
 </script>
 
 <template>

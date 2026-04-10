@@ -70,7 +70,7 @@ const profiles = ref<{ username: string; id: number }[]>([]);
 const handleRegisterUser = async () => {
   try {
     const response = await registerUser(newProfileName.value);
-    if (response.success && response.data) {
+    if (response.success) {
       toast.add({
         title: "Usuario registrado",
         description: `El usuario ${newProfileName.value} ha sido registrado exitosamente.`,

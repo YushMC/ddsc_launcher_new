@@ -60,6 +60,7 @@ const filesRepository = {
         path.join(userDataPath, destination),
         {
           recursive: true,
+          force: true,
         },
       );
       return returnObjetToResponseApi(
@@ -81,10 +82,13 @@ const filesRepository = {
     destination: string,
   ): Promise<ApiResponseDB> => {
     try {
-      await fs.copyFile(
-        path.normalize(source),
-        path.join(userDataPath, destination),
-      );
+      const normalizedSource = path.normalize(source);
+      const destinationPath = path.join(userDataPath, destination);
+
+      await fs.mkdir(path.dirname(destinationPath), { recursive: true });
+      await fs.rm(destinationPath, { force: true });
+      await fs.copyFile(normalizedSource, destinationPath);
+
       return returnObjetToResponseApi(
         true,
         "Archivo copiado exitosamente",

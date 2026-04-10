@@ -12,7 +12,7 @@
         <div class="flex items-start gap-5 jusrtify-start">
           <ULink
             raw
-            to="/"
+            to="/home"
             class="px-2 py-1 border-b-2 border-b-transparent"
             active-class="bg-primary/5 border-b-white"
           >
@@ -28,7 +28,7 @@
           </ULink>
           <ULink
             raw
-            to="/settings"
+            to="/home"
             class="px-2 py-1 border-b-2 border-b-transparent"
             active-class="bg-primary/5 border-b-white/10"
           >
@@ -36,7 +36,6 @@
           </ULink>
         </div>
         <div class="flex items-center gap-2 justify-end items-center">
-          {{ getSystemOS() }}
           <LayoutCredits />
           <LayoutClock />
         </div>
@@ -45,8 +44,6 @@
   </div>
 </template>
 
-<script setup lang="ts">
-const { getSystemOS } = useSO();
-</script>
+<script setup lang="ts"></script>
 
 <style scoped></style>
