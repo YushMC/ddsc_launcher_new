@@ -14,8 +14,10 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
         },
     },
     mods: {
-        getAll: () => ipcRenderer.invoke(ENDPOINTS.mods.get.all),
-        getByID: (id) => ipcRenderer.invoke(ENDPOINTS.mods.get.id, id),
+        get: {
+            all: () => ipcRenderer.invoke(ENDPOINTS.mods.get.all),
+            id: (id) => ipcRenderer.invoke(ENDPOINTS.mods.get.id, id),
+        },
         register: (mod) => ipcRenderer.invoke(ENDPOINTS.mods.register, mod),
         update: (mod) => ipcRenderer.invoke(ENDPOINTS.mods.update, mod),
         delete: (id) => ipcRenderer.invoke(ENDPOINTS.mods.delete, id),

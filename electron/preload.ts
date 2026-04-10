@@ -29,11 +29,13 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
   },
 
   mods: {
-    getAll: (): Promise<ApiResponseDB<ModInterface[]>> =>
-      ipcRenderer.invoke(ENDPOINTS.mods.get.all),
+    get: {
+      all: (): Promise<ApiResponseDB<ModInterface[]>> =>
+        ipcRenderer.invoke(ENDPOINTS.mods.get.all),
 
-    getByID: (id: number): Promise<ApiResponseDB<ModInterface>> =>
-      ipcRenderer.invoke(ENDPOINTS.mods.get.id, id),
+      id: (id: number): Promise<ApiResponseDB<ModInterface>> =>
+        ipcRenderer.invoke(ENDPOINTS.mods.get.id, id),
+    },
 
     register: (mod: ModInterface): Promise<ApiResponseDB> =>
       ipcRenderer.invoke(ENDPOINTS.mods.register, mod),
