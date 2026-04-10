@@ -144,6 +144,34 @@ export const Filespc = () => {
     },
   );
 
+  ipcMain.handle(
+    ENDPOINTS.files.select.zipFile,
+    async (): Promise<string | undefined> => {
+      return await filesRepository.selectZipFile();
+    },
+  );
+
+  ipcMain.handle(
+    ENDPOINTS.files.select.zipFiles,
+    async (): Promise<string[]> => {
+      return await filesRepository.selectZipFiles();
+    },
+  );
+
+  ipcMain.handle(
+    ENDPOINTS.files.select.folder,
+    async (): Promise<string | undefined> => {
+      return await filesRepository.selectFolder();
+    },
+  );
+
+  ipcMain.handle(
+    ENDPOINTS.files.select.zipOrFolder,
+    async (): Promise<string | undefined> => {
+      return await filesRepository.selectZipOrFolder();
+    },
+  );
+
   /* endpoints para ejecutar archivos */
 
   ipcMain.handle(

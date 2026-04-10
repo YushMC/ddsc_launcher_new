@@ -92,6 +92,16 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
       directory: (path: string): Promise<ApiResponseDB> =>
         ipcRenderer.invoke(ENDPOINTS.files.create.directory, path),
     },
+    select: {
+      zipFile: (): Promise<string | undefined> =>
+        ipcRenderer.invoke(ENDPOINTS.files.select.zipFile),
+      zipFiles: (): Promise<string[]> =>
+        ipcRenderer.invoke(ENDPOINTS.files.select.zipFiles),
+      folder: (): Promise<string | undefined> =>
+        ipcRenderer.invoke(ENDPOINTS.files.select.folder),
+      zipOrFolder: (): Promise<string | undefined> =>
+        ipcRenderer.invoke(ENDPOINTS.files.select.zipOrFolder),
+    },
     unzip: {
       file: (zipPath: string, extractTo: string): Promise<ApiResponseDB> =>
         ipcRenderer.invoke(ENDPOINTS.files.unzip.file, zipPath, extractTo),

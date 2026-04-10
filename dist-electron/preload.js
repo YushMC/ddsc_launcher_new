@@ -37,6 +37,12 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
         create: {
             directory: (path) => ipcRenderer.invoke(ENDPOINTS.files.create.directory, path),
         },
+        select: {
+            zipFile: () => ipcRenderer.invoke(ENDPOINTS.files.select.zipFile),
+            zipFiles: () => ipcRenderer.invoke(ENDPOINTS.files.select.zipFiles),
+            folder: () => ipcRenderer.invoke(ENDPOINTS.files.select.folder),
+            zipOrFolder: () => ipcRenderer.invoke(ENDPOINTS.files.select.zipOrFolder),
+        },
         unzip: {
             file: (zipPath, extractTo) => ipcRenderer.invoke(ENDPOINTS.files.unzip.file, zipPath, extractTo),
         },

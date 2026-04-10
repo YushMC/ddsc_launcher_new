@@ -39,6 +39,12 @@ const ENDPOINTS = {
         create: {
             directory: "files/create/directory",
         },
+        select: {
+            zipFile: "files/select/zip-file",
+            zipFiles: "files/select/zip-files",
+            folder: "files/select/folder",
+            zipOrFolder: "files/select/zip-or-folder",
+        },
         unzip: {
             file: "files/unzip/file",
         },

@@ -67,6 +67,18 @@ export const Filespc = () => {
     ipcMain.handle(ENDPOINTS.files.unzip.file, async (_, data) => {
         return await filesRepository.unzipFile(data.zipPath, data.extractTo);
     });
+    ipcMain.handle(ENDPOINTS.files.select.zipFile, async () => {
+        return await filesRepository.selectZipFile();
+    });
+    ipcMain.handle(ENDPOINTS.files.select.zipFiles, async () => {
+        return await filesRepository.selectZipFiles();
+    });
+    ipcMain.handle(ENDPOINTS.files.select.folder, async () => {
+        return await filesRepository.selectFolder();
+    });
+    ipcMain.handle(ENDPOINTS.files.select.zipOrFolder, async () => {
+        return await filesRepository.selectZipOrFolder();
+    });
     /* endpoints para ejecutar archivos */
     ipcMain.handle(ENDPOINTS.files.run.macos, async (_, filePath) => {
         return await filesRepository.runAppMacOs(filePath);

@@ -3,7 +3,7 @@ import { createReadStream } from "fs";
 import { returnObjetToResponseApi } from "../utils/querys.js";
 import unzipper from "unzipper";
 import pkg from "electron";
-const { app } = pkg;
+const { app, dialog } = pkg;
 import path from "path";
 const userDataPath = app.getPath("userData");
 const filesRepository = {
@@ -14,6 +14,7 @@ const filesRepository = {
                 .access(path.join(userDataPath, pathTemp))
                 .then(() => true)
                 .catch(() => false);
+            console.log("Directory check result for", pathTemp, ":", exists);
             return returnObjetToResponseApi(true, "Verificación de directorio exitosa", exists);
         }
         catch (error) {
@@ -52,6 +53,42 @@ const filesRepository = {
             console.error("Error in copyFile:", error);
             return returnObjetToResponseApi(false, "Error al copiar el archivo", null);
         }
+    },
+    selectZipFile: async () => {
+        const result = await dialog.showOpenDialog({
+            properties: ["openFile"],
+            filters: [
+                { name: "ZIP Files", extensions: ["zip"] },
+                { name: "All Files", extensions: ["*"] },
+            ],
+        });
+        return result.filePaths[0];
+    },
+    selectZipFiles: async () => {
+        const result = await dialog.showOpenDialog({
+            properties: ["openFile", "multiSelections"],
+            filters: [
+                { name: "ZIP Files", extensions: ["zip"] },
+                { name: "All Files", extensions: ["*"] },
+            ],
+        });
+        return result.filePaths;
+    },
+    selectFolder: async () => {
+        const result = await dialog.showOpenDialog({
+            properties: ["openDirectory"],
+        });
+        return result.filePaths[0];
+    },
+    selectZipOrFolder: async () => {
+        const result = await dialog.showOpenDialog({
+            properties: ["openFile", "openDirectory"],
+            filters: [
+                { name: "ZIP Files", extensions: ["zip"] },
+                { name: "All Files", extensions: ["*"] },
+            ],
+        });
+        return result.filePaths[0];
     },
     /* Método para descomprimir archivos ZIP */
     unzipFile: async (zipPath, extractTo) => {
