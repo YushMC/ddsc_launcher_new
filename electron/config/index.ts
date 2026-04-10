@@ -33,6 +33,7 @@ const ENDPOINTS = {
   },
   files: {
     check: "files/check",
+    joinPaths: "files/join-paths",
     copy: {
       file: "files/copy/file",
       directory: "files/copy/directory",

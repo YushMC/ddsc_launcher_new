@@ -107,6 +107,13 @@ export const Filespc = () => {
   );
 
   ipcMain.handle(
+    ENDPOINTS.files.joinPaths,
+    (_, ...paths: string[]): string => {
+      return filesRepository.joinPaths(...paths);
+    },
+  );
+
+  ipcMain.handle(
     ENDPOINTS.files.create.directory,
     async (_, pathTemp: string): Promise<ApiResponseDB> => {
       return await filesRepository.createDirectory(pathTemp);

@@ -7,6 +7,10 @@ const { app, dialog } = pkg;
 import path from "path";
 const userDataPath = app.getPath("userData");
 const filesRepository = {
+    /* Utilidades para rutas */
+    joinPaths: (...paths) => {
+        return path.join(...paths);
+    },
     /* Métodos para manejo de archivos y directorios */
     checkDirectoryExists: async (pathTemp) => {
         try {

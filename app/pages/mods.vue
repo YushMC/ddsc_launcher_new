@@ -115,12 +115,11 @@
 <script setup lang="ts">
 import type { SystemName } from "~/types/systemData";
 import CONST_KEYS from "~/utils/constants";
-import path from "path";
-const toast = useToast();
 
+const toast = useToast();
+const osName = ref<SystemName | null>(null);
 const { getSystemOS, getIdUser, getDirectoryName } = useSO();
-const { createModDirectory, copyDirectoryFiles, unzipFileFile } =
-  useInstallation();
+const { installModWithModeFolder, installModWithZipFile } = useInstallation();
 const modId = ref<number | undefined>(undefined);
 const itemsMods = ref<{ label: string; value: number }[]>([]);
 
@@ -194,108 +193,6 @@ const checkIFDDLCFolderExists = async (osName: SystemName) => {
   return response;
 };
 
-const installModWithModeFolder = async (modName: string) => {
-  const baseDirectory = getDirectoryName();
-  if (!baseDirectory) {
-    throw new Error("Base directory is not set");
-  }
-  const modFolder = await createModDirectory(modName, baseDirectory);
-  if (!modFolder.success) {
-    toast.add({
-      title: "Error",
-      description: modFolder.message,
-      color: "error",
-    });
-    return;
-  }
-  if (!modFolder.path) {
-    toast.add({
-      title: "Error",
-      description: "La ruta del directorio del mod no está disponible.",
-      color: "error",
-    });
-    return;
-  }
-  const copyResponse = await copyDirectoryFiles(
-    pathFileFolder.value,
-    modFolder.path,
-  );
-  if (!copyResponse.success) {
-    toast.add({
-      title: "Error",
-      description: copyResponse.message,
-      color: "error",
-    });
-    return;
-  }
-  toast.add({
-    title: "Éxito",
-    description: "Mod instalado correctamente.",
-    color: "success",
-  });
-};
-
-const installModWithZipFile = async (modName: string) => {
-  const baseDirectory = getDirectoryName();
-  if (!baseDirectory) {
-    throw new Error("Base directory is not set");
-  }
-  const modFolder = await createModDirectory(modName, baseDirectory);
-  if (!modFolder.success) {
-    toast.add({
-      title: "Error",
-      description: modFolder.message,
-      color: "error",
-    });
-    return;
-  }
-  if (!modFolder.path) {
-    toast.add({
-      title: "Error",
-      description: "La ruta del directorio del mod no está disponible.",
-      color: "error",
-    });
-    return;
-  }
-  const unzipResponse = await unzipFileFile(pathFileZip.value, modFolder.path);
-  if (!unzipResponse.success) {
-    toast.add({
-      title: "Error",
-      description: unzipResponse.message,
-      color: "error",
-    });
-    return;
-  }
-  if (!unzipResponse.path) {
-    toast.add({
-      title: "Error",
-      description:
-        "La ruta de destino después de descomprimir no está disponible.",
-      color: "error",
-    });
-    return;
-  }
-
-  const copyResponse = await copyDirectoryFiles(
-    unzipResponse.path,
-    modFolder.path,
-  );
-  if (!copyResponse.success) {
-    toast.add({
-      title: "Error",
-      description: copyResponse.message,
-      color: "error",
-    });
-    return;
-  }
-
-  toast.add({
-    title: "Éxito",
-    description: "Mod instalado correctamente.",
-    color: "success",
-  });
-};
-
 const hanldeModeInstallation = async () => {
   if (!modId.value) {
     toast.add({
@@ -328,10 +225,92 @@ const hanldeModeInstallation = async () => {
     return;
   }
 
+  if (pathFileZip.value.trim() !== "" && pathFileFolder.value.trim() !== "") {
+    toast.add({
+      title: "Error",
+      description:
+        "Por favor, proporciona solo una ruta: o el archivo zip o la carpeta del mod, no ambos.",
+      color: "error",
+    });
+    return;
+  }
+
+  const baseDirectory = getDirectoryName();
+  if (!baseDirectory) {
+    toast.add({
+      title: "Error",
+      description: "No se ha encontrado la carpeta del juego.",
+      color: "error",
+    });
+    return;
+  }
+
+  if (!osName.value) {
+    toast.add({
+      title: "Error",
+      description: "No se ha podido determinar el sistema operativo.",
+      color: "error",
+    });
+    return;
+  }
+
+  const installationToast = toast.add({
+    title: "Instalando Mod",
+    description: `Se está instalando el mod "${selectedMod.resource.name}". Por favor, espera...`,
+    color: "info",
+    close: false,
+  });
+  const installationToastId = installationToast.id;
+
   if (pathFileZip.value.trim() !== "") {
-    await installModWithZipFile(selectedMod.resource.name);
+    const response = await installModWithZipFile(
+      selectedMod.resource.name,
+      baseDirectory,
+      pathFileZip.value,
+      osName.value,
+    );
+
+    if (response.success) {
+      toast.update(installationToastId, {
+        title: "Mod instalado",
+        description: `El mod "${selectedMod.resource.name}" se ha instalado correctamente.`,
+        color: "success",
+        actions: [],
+        close: true,
+      });
+    } else {
+      toast.update(installationToastId, {
+        title: "Error",
+        description: `Hubo un error al instalar el mod "${selectedMod.resource.name}". Por favor, intenta nuevamente.`,
+        color: "error",
+        actions: [],
+        close: true,
+      });
+    }
   } else if (pathFileFolder.value.trim() !== "") {
-    await installModWithModeFolder(selectedMod.resource.name);
+    const response = await installModWithModeFolder(
+      selectedMod.resource.name,
+      baseDirectory,
+      pathFileFolder.value,
+      osName.value,
+    );
+    if (response.success) {
+      toast.update(installationToastId, {
+        title: "Mod instalado",
+        description: `El mod "${selectedMod.resource.name}" se ha instalado correctamente.`,
+        color: "success",
+        actions: [],
+        close: true,
+      });
+    } else {
+      toast.update(installationToastId, {
+        title: "Error",
+        description: `Hubo un error al instalar el mod "${selectedMod.resource.name}". Por favor, intenta nuevamente.`,
+        color: "error",
+        actions: [],
+        close: true,
+      });
+    }
   }
 };
 
@@ -340,9 +319,9 @@ onBeforeMount(async () => {
     navigateTo("/");
     return;
   }
-  const osName = getSystemOS();
-  if (osName) {
-    const response = await checkIFDDLCFolderExists(osName);
+  osName.value = getSystemOS();
+  if (osName.value) {
+    const response = await checkIFDDLCFolderExists(osName.value);
     if (response.success && response.data) {
       existsDDLCFolder.value = response.data;
       await getAllModsFromApi();

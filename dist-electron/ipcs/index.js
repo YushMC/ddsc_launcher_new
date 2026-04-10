@@ -54,6 +54,9 @@ export const Filespc = () => {
     ipcMain.handle(ENDPOINTS.files.check, async (_, filePath) => {
         return await filesRepository.checkDirectoryExists(filePath);
     });
+    ipcMain.handle(ENDPOINTS.files.joinPaths, (_, ...paths) => {
+        return filesRepository.joinPaths(...paths);
+    });
     ipcMain.handle(ENDPOINTS.files.create.directory, async (_, pathTemp) => {
         return await filesRepository.createDirectory(pathTemp);
     });

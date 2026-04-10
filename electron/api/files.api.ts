@@ -9,6 +9,11 @@ import path from "path";
 const userDataPath = app.getPath("userData");
 
 const filesRepository = {
+  /* Utilidades para rutas */
+  joinPaths: (...paths: string[]): string => {
+    return path.join(...paths);
+  },
+
   /* Métodos para manejo de archivos y directorios */
   checkDirectoryExists: async (
     pathTemp: string,

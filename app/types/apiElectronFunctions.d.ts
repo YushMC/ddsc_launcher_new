@@ -7,6 +7,7 @@ interface Window {
 
 interface FilesApi {
   check: (path: string) => Promise<ApiResponseDB<boolean>>;
+  joinPaths: (...paths: string[]) => Promise<string>;
   copy: {
     file: (source: string, destination: string) => Promise<ApiResponseDB>;
     directory: (source: string, destination: string) => Promise<ApiResponseDB>;

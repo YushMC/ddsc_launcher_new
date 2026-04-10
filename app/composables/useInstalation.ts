@@ -1,8 +1,7 @@
-import path from "path";
 import type { SystemName } from "~/types/systemData";
 
 const createModDirectory = async (modName: string, baseDirectory: string) => {
-  const directoryName = path.join(baseDirectory, `mod_${modName}`);
+  const directoryName = await window.api.files.joinPaths(baseDirectory, `mod_${modName}`);
 
   try {
     const checkResponse = await window.api.files.check(directoryName);
@@ -103,7 +102,7 @@ const installModWithZipFile = async (
 
   let pathToDestino = modFolder.path;
   if (osName === "MacOS") {
-    pathToDestino = path.join(
+    pathToDestino = await window.api.files.joinPaths(
       pathToDestino,
       "ddlc-mac",
       "DDLC.app",
@@ -151,7 +150,7 @@ const installModWithModeFolder = async (
   }
   let pathToDestino = modFolder.path;
   if (osName === "MacOS") {
-    pathToDestino = path.join(
+    pathToDestino = await window.api.files.joinPaths(
       pathToDestino,
       "ddlc-mac",
       "DDLC.app",
