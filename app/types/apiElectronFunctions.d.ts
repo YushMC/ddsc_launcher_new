@@ -11,6 +11,7 @@ interface FilesApi {
   copy: {
     file: (source: string, destination: string) => Promise<ApiResponseDB>;
     internal: (source: string, destination: string) => Promise<ApiResponseDB>;
+    internalDirectory: (source: string, destination: string) => Promise<ApiResponseDB>;
     directory: (source: string, destination: string) => Promise<ApiResponseDB>;
   };
   create: {

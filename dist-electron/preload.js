@@ -35,6 +35,7 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
             file: (source, destination) => ipcRenderer.invoke(ENDPOINTS.files.copy.file, { source, destination }),
             directory: (source, destination) => ipcRenderer.invoke(ENDPOINTS.files.copy.directory, { source, destination }),
             internal: (source, destination) => ipcRenderer.invoke(ENDPOINTS.files.copy.internal, { source, destination }),
+            internalDirectory: (source, destination) => ipcRenderer.invoke(ENDPOINTS.files.copy.internalDirectory, { source, destination }),
         },
         create: {
             directory: (path) => ipcRenderer.invoke(ENDPOINTS.files.create.directory, path),

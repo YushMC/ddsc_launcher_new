@@ -96,6 +96,22 @@ const filesRepository = {
             return returnObjetToResponseApi(false, "Error al copiar los archivos internos", null);
         }
     },
+    copyInternalDirectory: async (source, destination) => {
+        try {
+            const normalizedSource = path.normalize(source);
+            const normalizedDestination = path.normalize(destination);
+            await fs.cp(normalizedSource, normalizedDestination, {
+                recursive: true,
+                force: true,
+            });
+            console.log("Internal directory copied successfully from", normalizedSource, "to", normalizedDestination);
+            return returnObjetToResponseApi(true, "Directorio copiado exitosamente", null);
+        }
+        catch (error) {
+            console.error("Error in copyInternalDirectory:", error);
+            return returnObjetToResponseApi(false, "Error al copiar el directorio interno", null);
+        }
+    },
     selectZipFile: async () => {
         const result = await dialog.showOpenDialog({
             properties: ["openFile"],

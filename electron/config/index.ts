@@ -37,6 +37,7 @@ const ENDPOINTS = {
     copy: {
       file: "files/copy/file",
       internal: "files/copy/internal",
+      internalDirectory: "files/copy/internal-directory",
       directory: "files/copy/directory",
     },
     create: {
