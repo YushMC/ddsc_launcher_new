@@ -46,8 +46,8 @@ export const BDpc = () => {
 
   ipcMain.handle(
     ENDPOINTS.users.register,
-    (_, data: UserInterface): ApiResponseDB<any> => {
-      return usersRepository.create(data);
+    (_, username: string): ApiResponseDB<any> => {
+      return usersRepository.create(username);
     },
   );
   ipcMain.handle(

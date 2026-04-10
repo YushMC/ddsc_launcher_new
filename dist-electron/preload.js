@@ -7,7 +7,7 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
             byID: (id) => ipcRenderer.invoke(ENDPOINTS.users.get.byID, id),
             all: () => ipcRenderer.invoke(ENDPOINTS.users.get.all),
         },
-        register: (data) => ipcRenderer.invoke(ENDPOINTS.users.register, data),
+        register: (username) => ipcRenderer.invoke(ENDPOINTS.users.register, username),
         update: {
             username: (username) => ipcRenderer.invoke(ENDPOINTS.users.update.username, username),
             developerMode: (developerMode) => ipcRenderer.invoke(ENDPOINTS.users.update.developer_mode, developerMode),

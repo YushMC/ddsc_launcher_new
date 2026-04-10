@@ -47,13 +47,13 @@ const usersRepository = {
             return returnObjetToResponseApi(false, error);
         }
     },
-    create(data) {
+    create(username) {
         try {
             const queries = getQuerysPrepare();
             queries.insertUser.run({
-                username: data.username,
-                is_developer: data.developer_mode ? 1 : 0,
-                is_active: data.is_active ? 1 : 0,
+                username: username,
+                is_developer: 0,
+                is_active: 1,
             });
             return returnObjetToResponseApi(true, "Usuario agregado correctamente");
         }

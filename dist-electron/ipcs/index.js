@@ -26,8 +26,8 @@ export const BDpc = () => {
     ipcMain.handle(ENDPOINTS.users.get.all, () => {
         return usersRepository.getAll();
     });
-    ipcMain.handle(ENDPOINTS.users.register, (_, data) => {
-        return usersRepository.create(data);
+    ipcMain.handle(ENDPOINTS.users.register, (_, username) => {
+        return usersRepository.create(username);
     });
     ipcMain.handle(ENDPOINTS.users.update.username, (_, data) => {
         return usersRepository.updateUsername(data);
