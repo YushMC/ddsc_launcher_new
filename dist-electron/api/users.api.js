@@ -1,7 +1,7 @@
 import { getDatabase } from "../database/db.js";
 import { prepareQuery, returnObjetToResponseApi } from "../utils/querys.js";
 const AllUsersQuerys = {
-    setUserData: "INSERT INTO users (username, path_launcher, is_developer, is_active) VALUES (?, ?, ?, ?)",
+    setUserData: "INSERT INTO users (username, is_developer, is_active) VALUES (?, ?, ?)",
     getAllUsers: "SELECT * FROM users WHERE is_active = 1 ORDER BY id DESC",
     getUserDataById: "SELECT * FROM users WHERE id = ?",
     updateUserUsernameById: "UPDATE users SET username = ? WHERE id = ?",
@@ -52,7 +52,6 @@ const usersRepository = {
             const queries = getQuerysPrepare();
             queries.insertUser.run({
                 username: data.username,
-                path_launcher: data.path_launcher,
                 is_developer: data.developer_mode ? 1 : 0,
                 is_active: data.is_active ? 1 : 0,
             });
