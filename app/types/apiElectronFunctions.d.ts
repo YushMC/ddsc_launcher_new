@@ -10,8 +10,13 @@ interface FilesApi {
   joinPaths: (...paths: string[]) => Promise<string>;
   copy: {
     file: (source: string, destination: string) => Promise<ApiResponseDB>;
-    internal: (source: string, destination: string) => Promise<ApiResponseDB>;
-    internalDirectory: (source: string, destination: string) => Promise<ApiResponseDB>;
+    internal: {
+      file: (source: string, destination: string) => Promise<ApiResponseDB>;
+      directory: (
+        source: string,
+        destination: string,
+      ) => Promise<ApiResponseDB>;
+    };
     directory: (source: string, destination: string) => Promise<ApiResponseDB>;
   };
   create: {

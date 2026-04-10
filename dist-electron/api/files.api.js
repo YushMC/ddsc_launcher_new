@@ -82,8 +82,8 @@ const filesRepository = {
     },
     copyInternalFile: async (source, destination) => {
         try {
-            const normalizedSource = path.normalize(source);
-            const normalizedDestination = path.normalize(destination);
+            const normalizedSource = path.join(userDataPath, path.normalize(source));
+            const normalizedDestination = path.join(userDataPath, path.normalize(destination));
             await fs.cp(normalizedSource, normalizedDestination, {
                 recursive: true,
                 force: true,
@@ -98,8 +98,8 @@ const filesRepository = {
     },
     copyInternalDirectory: async (source, destination) => {
         try {
-            const normalizedSource = path.normalize(source);
-            const normalizedDestination = path.normalize(destination);
+            const normalizedSource = path.join(userDataPath, path.normalize(source));
+            const normalizedDestination = path.join(userDataPath, path.normalize(destination));
             await fs.cp(normalizedSource, normalizedDestination, {
                 recursive: true,
                 force: true,

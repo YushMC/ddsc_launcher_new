@@ -51,9 +51,12 @@ const copyDirectoryFiles = async (source: string, destination: string) => {
   }
 };
 
-const copyInternalFiles = async (source: string, destination: string) => {
+const copyInternalDirectory = async (source: string, destination: string) => {
   try {
-    const response = await window.api.files.copy.internal(source, destination);
+    const response = await window.api.files.copy.internal.directory(
+      source,
+      destination,
+    );
     return response;
   } catch (error) {
     return {
@@ -181,7 +184,7 @@ const installModWithModeFolder = async (
 
   /* Copiado de los archivos de DDLC a la carpeta del mod */
 
-  const copyDDLCResponse = await copyInternalFiles(
+  const copyDDLCResponse = await copyInternalDirectory(
     DDLCFilesPath,
     ddlcFolderDirectory.path,
   );

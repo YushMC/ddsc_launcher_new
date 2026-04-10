@@ -36,9 +36,11 @@ const ENDPOINTS = {
     joinPaths: "files/join-paths",
     copy: {
       file: "files/copy/file",
-      internal: "files/copy/internal",
-      internalDirectory: "files/copy/internal-directory",
       directory: "files/copy/directory",
+      internal: {
+        file: "files/copy/internal/file",
+        directory: "files/copy/internal/directory",
+      },
     },
     create: {
       directory: "files/create/directory",

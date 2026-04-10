@@ -120,7 +120,7 @@ const filesRepository = {
     }
   },
 
-   copyFile: async (
+  copyFile: async (
     source: string,
     destination: string,
   ): Promise<ApiResponseDB> => {
@@ -157,8 +157,11 @@ const filesRepository = {
     destination: string,
   ): Promise<ApiResponseDB> => {
     try {
-      const normalizedSource = path.normalize(source);
-      const normalizedDestination = path.normalize(destination);
+      const normalizedSource = path.join(userDataPath, path.normalize(source));
+      const normalizedDestination = path.join(
+        userDataPath,
+        path.normalize(destination),
+      );
 
       await fs.cp(normalizedSource, normalizedDestination, {
         recursive: true,
@@ -191,8 +194,11 @@ const filesRepository = {
     destination: string,
   ): Promise<ApiResponseDB> => {
     try {
-      const normalizedSource = path.normalize(source);
-      const normalizedDestination = path.normalize(destination);
+      const normalizedSource = path.join(userDataPath, path.normalize(source));
+      const normalizedDestination = path.join(
+        userDataPath,
+        path.normalize(destination),
+      );
 
       await fs.cp(normalizedSource, normalizedDestination, {
         recursive: true,

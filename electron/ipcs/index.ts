@@ -138,7 +138,7 @@ export const Filespc = () => {
   );
 
   ipcMain.handle(
-    ENDPOINTS.files.copy.internal,
+    ENDPOINTS.files.copy.internal.file,
     async (
       _,
       data: { source: string; destination: string },
@@ -151,7 +151,7 @@ export const Filespc = () => {
   );
 
   ipcMain.handle(
-    ENDPOINTS.files.copy.internalDirectory,
+    ENDPOINTS.files.copy.internal.directory,
     async (
       _,
       data: { source: string; destination: string },
