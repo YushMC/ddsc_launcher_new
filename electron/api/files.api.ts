@@ -41,6 +41,7 @@ const filesRepository = {
   createDirectory: async (pathTemp: string): Promise<ApiResponseDB> => {
     try {
       await fs.mkdir(path.join(userDataPath, pathTemp), { recursive: true });
+      console.log("Directory created successfully at", pathTemp);
       return returnObjetToResponseApi(
         true,
         "Directorio creado exitosamente",
@@ -68,6 +69,12 @@ const filesRepository = {
           force: true,
         },
       );
+      console.log(
+        "Directory copied successfully from",
+        source,
+        "to",
+        destination,
+      );
       return returnObjetToResponseApi(
         true,
         "Directorio copiado exitosamente",
@@ -82,7 +89,38 @@ const filesRepository = {
       );
     }
   },
-  copyFile: async (
+
+  copyDirectoryFree: async (
+    source: string,
+    destination: string,
+  ): Promise<ApiResponseDB> => {
+    try {
+      await fs.cp(path.normalize(source), path.normalize(destination), {
+        recursive: true,
+        force: true,
+      });
+      console.log(
+        "Directory copied successfully from",
+        source,
+        "to",
+        destination,
+      );
+      return returnObjetToResponseApi(
+        true,
+        "Directorio copiado exitosamente",
+        null,
+      );
+    } catch (error) {
+      console.error("Error in copyDirectoryFree:", error);
+      return returnObjetToResponseApi(
+        false,
+        "Error al copiar el directorio",
+        null,
+      );
+    }
+  },
+
+   copyFile: async (
     source: string,
     destination: string,
   ): Promise<ApiResponseDB> => {
@@ -93,6 +131,12 @@ const filesRepository = {
       await fs.mkdir(path.dirname(destinationPath), { recursive: true });
       await fs.rm(destinationPath, { force: true });
       await fs.copyFile(normalizedSource, destinationPath);
+      console.log(
+        "File copied successfully from",
+        normalizedSource,
+        "to",
+        destinationPath,
+      );
 
       return returnObjetToResponseApi(
         true,
@@ -104,6 +148,39 @@ const filesRepository = {
       return returnObjetToResponseApi(
         false,
         "Error al copiar el archivo",
+        null,
+      );
+    }
+  },
+  copyInternalFile: async (
+    source: string,
+    destination: string,
+  ): Promise<ApiResponseDB> => {
+    try {
+      const normalizedSource = path.normalize(source);
+      const normalizedDestination = path.normalize(destination);
+
+      await fs.cp(normalizedSource, normalizedDestination, {
+        recursive: true,
+        force: true,
+      });
+      console.log(
+        "Internal files copied successfully from",
+        normalizedSource,
+        "to",
+        normalizedDestination,
+      );
+
+      return returnObjetToResponseApi(
+        true,
+        "Archivos copiados exitosamente",
+        null,
+      );
+    } catch (error) {
+      console.error("Error in copyInternalFile:", error);
+      return returnObjetToResponseApi(
+        false,
+        "Error al copiar los archivos internos",
         null,
       );
     }
@@ -157,6 +234,7 @@ const filesRepository = {
       await createReadStream(path.normalize(zipPath))
         .pipe(unzipper.Extract({ path: path.join(userDataPath, extractTo) }))
         .promise();
+      console.log("File unzipped successfully from", zipPath, "to", extractTo);
       return returnObjetToResponseApi(
         true,
         "Archivo descomprimido exitosamente",

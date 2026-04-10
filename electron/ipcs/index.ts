@@ -106,12 +106,9 @@ export const Filespc = () => {
     },
   );
 
-  ipcMain.handle(
-    ENDPOINTS.files.joinPaths,
-    (_, ...paths: string[]): string => {
-      return filesRepository.joinPaths(...paths);
-    },
-  );
+  ipcMain.handle(ENDPOINTS.files.joinPaths, (_, ...paths: string[]): string => {
+    return filesRepository.joinPaths(...paths);
+  });
 
   ipcMain.handle(
     ENDPOINTS.files.create.directory,
@@ -137,6 +134,19 @@ export const Filespc = () => {
       data: { source: string; destination: string },
     ): Promise<ApiResponseDB> => {
       return await filesRepository.copyFile(data.source, data.destination);
+    },
+  );
+
+  ipcMain.handle(
+    ENDPOINTS.files.copy.internal,
+    async (
+      _,
+      data: { source: string; destination: string },
+    ): Promise<ApiResponseDB> => {
+      return await filesRepository.copyInternalFile(
+        data.source,
+        data.destination,
+      );
     },
   );
   /* endpoint para descomprimir archivos */

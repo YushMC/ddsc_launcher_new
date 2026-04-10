@@ -1,10 +1,7 @@
 import type { SystemName } from "~/types/systemData";
 
-const createModDirectory = async (modName: string, baseDirectory: string) => {
-  const directoryName = await window.api.files.joinPaths(
-    baseDirectory,
-    `mod_${modName}`,
-  );
+const createDirectory = async (name: string, prevDirectory: string) => {
+  const directoryName = await window.api.files.joinPaths(prevDirectory, name);
 
   try {
     const checkResponse = await window.api.files.check(directoryName);
@@ -19,7 +16,7 @@ const createModDirectory = async (modName: string, baseDirectory: string) => {
     if (checkResponse.data) {
       return {
         success: true,
-        message: "Mod directory already exists",
+        message: "Directory already exists",
         path: directoryName,
       };
     }
@@ -30,8 +27,8 @@ const createModDirectory = async (modName: string, baseDirectory: string) => {
     return {
       success: createResponse.success,
       message: createResponse.success
-        ? "Mod directory created successfully"
-        : `Error creating mod directory: ${createResponse.message}`,
+        ? "Directory created successfully"
+        : `Error creating directory: ${createResponse.message}`,
       path: directoryName,
     };
   } catch (error) {
@@ -50,6 +47,18 @@ const copyDirectoryFiles = async (source: string, destination: string) => {
     return {
       success: false,
       message: `Error copying directory: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+};
+
+const copyInternalFiles = async (source: string, destination: string) => {
+  try {
+    const response = await window.api.files.copy.internal(source, destination);
+    return response;
+  } catch (error) {
+    return {
+      success: false,
+      message: `Error copying internal files: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 };
@@ -76,7 +85,7 @@ const installModWithZipFile = async (
   pathFileZip: string,
   osName: SystemName,
 ) => {
-  const modFolder = await createModDirectory(modName, baseDirectory);
+  const modFolder = await createDirectory(`mod_${modName}`, baseDirectory);
   if (!modFolder.success) {
     return {
       success: false,
@@ -138,7 +147,8 @@ const installModWithModeFolder = async (
   pathFileFolder: string,
   osName: SystemName,
 ) => {
-  const modFolder = await createModDirectory(modName, baseDirectory);
+  /* Creacion de la carpeta del mod */
+  const modFolder = await createDirectory(`mod_${modName}`, baseDirectory);
   if (!modFolder.success) {
     return {
       success: false,
@@ -151,15 +161,29 @@ const installModWithModeFolder = async (
       message: "Mod directory path is not available.",
     };
   }
-
-  const DDLCFilesPath = await window.api.files.joinPaths(
-    baseDirectory,
-    osName === "MacOS" ? "ddlc-mac" : "",
+  /* Creacion de la carpeta de DDLC dentro de la carpeta del mod */
+  const ddlcFolderDirectory = await createDirectory(
+    osName === "MacOS" ? "ddlc-mac" : "ddlc-windows",
+    modFolder.path,
   );
 
-  const copyDDLCResponse = await copyDirectoryFiles(
+  if (!ddlcFolderDirectory.success || !ddlcFolderDirectory.path) {
+    return {
+      success: false,
+      message: `Error creating DDLC directory: ${ddlcFolderDirectory.message}`,
+    };
+  }
+  /* ruta de los archivos de DDLC dentro del proyecto */
+  const DDLCFilesPath = await window.api.files.joinPaths(
+    "",
+    osName === "MacOS" ? "ddlc-mac" : "ddlc-windows",
+  );
+
+  /* Copiado de los archivos de DDLC a la carpeta del mod */
+
+  const copyDDLCResponse = await copyInternalFiles(
     DDLCFilesPath,
-    modFolder.path,
+    ddlcFolderDirectory.path,
   );
   if (!copyDDLCResponse.success) {
     return {
@@ -167,7 +191,7 @@ const installModWithModeFolder = async (
       message: `Error copying DDLC files: ${copyDDLCResponse.message}`,
     };
   }
-
+  /* Copiado de los archivos del mod a la carpeta del mod */
   let pathToDestino = modFolder.path;
   if (osName === "MacOS") {
     pathToDestino = await window.api.files.joinPaths(
@@ -195,7 +219,7 @@ const installModWithModeFolder = async (
 
 export function useInstallation() {
   return {
-    createModDirectory,
+    createDirectory,
     copyDirectoryFiles,
     unzipFileFile,
     installModWithZipFile,
