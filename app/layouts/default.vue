@@ -20,14 +20,6 @@
           </ULink>
           <ULink
             raw
-            to="/mods"
-            class="px-2 py-1 border-b-2 border-b-transparent"
-            active-class="bg-primary/5 border-b-white/10"
-          >
-            Mods
-          </ULink>
-          <ULink
-            raw
             to="/home"
             class="px-2 py-1 border-b-2 border-b-transparent"
             active-class="bg-primary/5 border-b-white/10"

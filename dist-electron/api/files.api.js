@@ -101,6 +101,13 @@ const filesRepository = {
         try {
             const normalizedSource = path.join(userDataPath, path.normalize(source));
             const normalizedDestination = path.join(userDataPath, path.normalize(destination));
+            const checkIFExistsFolderDestination = await filesRepository.checkDirectoryExists(normalizedDestination);
+            if (!checkIFExistsFolderDestination?.data) {
+                const createDirResponse = await filesRepository.createDirectory(normalizedDestination);
+                if (!createDirResponse.success) {
+                    return returnObjetToResponseApi(false, "Error al crear el directorio de destino interno", null);
+                }
+            }
             await fs.cp(normalizedSource, normalizedDestination, {
                 recursive: true,
                 force: true,
@@ -110,6 +117,29 @@ const filesRepository = {
         }
         catch (error) {
             console.error("Error in copyInternalDirectory:", error);
+            return returnObjetToResponseApi(false, "Error al copiar el directorio interno", null);
+        }
+    },
+    copyToInternalDirectory: async (source, destination) => {
+        try {
+            const normalizedSource = path.normalize(source);
+            const normalizedDestination = path.join(userDataPath, path.normalize(destination));
+            const checkIFExistsFolderDestination = await filesRepository.checkDirectoryExists(normalizedDestination);
+            if (!checkIFExistsFolderDestination?.data) {
+                const createDirResponse = await filesRepository.createDirectory(normalizedDestination);
+                if (!createDirResponse.success) {
+                    return returnObjetToResponseApi(false, "Error al crear el directorio de destino interno", null);
+                }
+            }
+            await fs.cp(normalizedSource, normalizedDestination, {
+                recursive: true,
+                force: true,
+            });
+            console.log("Internal directory copied successfully from", normalizedSource, "to", normalizedDestination);
+            return returnObjetToResponseApi(true, "Directorio copiado exitosamente", null);
+        }
+        catch (error) {
+            console.error("Error in copyToInternalDirectory:", error);
             return returnObjetToResponseApi(false, "Error al copiar el directorio interno", null);
         }
     },

@@ -90,14 +90,34 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
         source: string,
         destination: string,
       ): Promise<ApiResponseDB> =>
-        ipcRenderer.invoke(ENDPOINTS.files.copy.directory, { source, destination }),
+        ipcRenderer.invoke(ENDPOINTS.files.copy.directory, {
+          source,
+          destination,
+        }),
 
       internal: {
         file: (source: string, destination: string): Promise<ApiResponseDB> =>
-          ipcRenderer.invoke(ENDPOINTS.files.copy.internal.file, { source, destination }),
+          ipcRenderer.invoke(ENDPOINTS.files.copy.internal.file, {
+            source,
+            destination,
+          }),
 
-        directory: (source: string, destination: string): Promise<ApiResponseDB> =>
-          ipcRenderer.invoke(ENDPOINTS.files.copy.internal.directory, { source, destination }),
+        directory: (
+          source: string,
+          destination: string,
+        ): Promise<ApiResponseDB> =>
+          ipcRenderer.invoke(ENDPOINTS.files.copy.internal.directory, {
+            source,
+            destination,
+          }),
+        toInternal: (
+          source: string,
+          destination: string,
+        ): Promise<ApiResponseDB> =>
+          ipcRenderer.invoke(ENDPOINTS.files.copy.internal.toInternal, {
+            source,
+            destination,
+          }),
       },
     },
     create: {

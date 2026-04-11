@@ -1,122 +1,114 @@
 <template>
-  <UCard class="w-full flex flex-col gap-5" variant="soft">
-    <UContainer class="flex items-center justify-center p-0 m-0 flex-col gap-5">
-      <div class="text-lg text-muted-foreground">Mods</div>
-      <div class="flex items-center justify-center gap-5">
-        <UModal title="Agregar Mod" :closeable="true">
-          <UButton variant="outline" size="xl" icon="i-lucide-book-plus">
-            Add Mod
-          </UButton>
-          <template #body>
-            <UAlert
-              v-if="!existsDDLCFolder"
-              title="URGENTE"
-              variant="soft"
-              description="No se ha encontrado la carpeta del juego. Por favor, asegúrate de realizar el proceso de instalación."
-              icon="i-lucide-triangle-alert"
-              class="mb-5"
-              color="error"
+  <UModal title="Agregar Mod" :closeable="true">
+    <UTooltip text="Agregar un nuevo mod ">
+      <UButton variant="outline" size="xl" icon="i-lucide-book-plus">
+        Add Mod
+      </UButton>
+    </UTooltip>
+    <template #body>
+      <UAlert
+        v-if="!existsDDLCFolder"
+        title="URGENTE"
+        variant="soft"
+        description="No se ha encontrado la carpeta del juego. Por favor, asegúrate de realizar el proceso de instalación."
+        icon="i-lucide-triangle-alert"
+        class="mb-5"
+        color="error"
+      />
+
+      <div v-else class="flex flex-col gap-5 w-full">
+        <UAlert
+          v-if="getSystemOS() === 'MacOS' || getSystemOS() === 'Linux'"
+          title="IMPORTANTE"
+          variant="soft"
+          :description="`Para ${getSystemOS()}, no se podrán ejecutar mods con archivos .exe propios, por lo que solo se podrán ejecutar mods que sean modificaciones de archivos del juego original.`"
+          icon="i-lucide-triangle-alert"
+          class="mb-5"
+          color="warning"
+        />
+
+        <div class="flex flex-col gap-5 w-full">
+          <UFormField label="Selecciona un Mod">
+            <USelectMenu
+              v-model="modId"
+              :items="itemsMods"
+              value-key="value"
+              placeholder="Nombre del mod"
+              class="w-full"
             />
-
-            <div v-else class="flex flex-col gap-5 w-full">
-              <UAlert
-                v-if="getSystemOS() === 'MacOS' || getSystemOS() === 'Linux'"
-                title="IMPORTANTE"
-                variant="soft"
-                :description="`Para ${getSystemOS()}, no se podrán ejecutar mods con archivos .exe propios, por lo que solo se podrán ejecutar mods que sean modificaciones de archivos del juego original.`"
-                icon="i-lucide-triangle-alert"
-                class="mb-5"
-                color="warning"
-              />
-
-              <div class="flex flex-col gap-5 w-full">
-                <UFormField label="Selecciona un Mod">
-                  <USelectMenu
-                    v-model="modId"
-                    :items="itemsMods"
-                    value-key="value"
-                    placeholder="Nombre del mod"
-                    class="w-full"
-                  />
-                </UFormField>
-                <UContainer
-                  class="flex flex-col gap-5 items-center justify-center p-5 w-full border rounded-md border-muted"
-                  variant="soft"
-                  v-if="modId"
-                >
-                  <UFormField
-                    label="Ruta del Archivo Zip (Mod)"
-                    class="w-full"
-                    v-if="
-                      pathFileFolder.trim() === '' &&
-                      getSystemOS() !== 'MacOS' &&
-                      getSystemOS() !== 'Linux'
-                    "
-                  >
-                    <div class="flex items-center gap-2 justify-start w-full">
-                      <UInput
-                        v-model="pathFileZip"
-                        placeholder="Ruta del Archivo Zip (Mod)"
-                        class="w-full"
-                      />
-                      <UButton
-                        variant="ghost"
-                        class="w-fit h-fit"
-                        icon="i-lucide-folder-open"
-                        @click="openFilePicker('zip')"
-                      >
-                      </UButton>
-                    </div>
-                  </UFormField>
-                  <USeparator
-                    label="ó"
-                    v-if="
-                      pathFileZip.trim() === '' &&
-                      pathFileFolder.trim() === '' &&
-                      getSystemOS() !== 'MacOS' &&
-                      getSystemOS() !== 'Linux'
-                    "
-                  />
-                  <UFormField
-                    label="Ruta de la carpeta del Mod"
-                    class="w-full"
-                    v-if="pathFileZip.trim() === ''"
-                  >
-                    <div class="flex items-center gap-2 justify-start w-full">
-                      <UInput
-                        v-model="pathFileFolder"
-                        placeholder="Ruta de la carpeta del Mod"
-                        class="w-full"
-                      />
-                      <UButton
-                        variant="ghost"
-                        class="w-fit h-fit"
-                        icon="i-lucide-folder-open"
-                        @click="openFilePicker('folder')"
-                      >
-                      </UButton>
-                    </div>
-                  </UFormField>
-                </UContainer>
-
+          </UFormField>
+          <UContainer
+            class="flex flex-col gap-5 items-center justify-center p-5 w-full border rounded-md border-muted"
+            variant="soft"
+            v-if="modId"
+          >
+            <UFormField
+              label="Ruta del Archivo Zip (Mod)"
+              class="w-full"
+              v-if="
+                pathFileFolder.trim() === '' &&
+                getSystemOS() !== 'MacOS' &&
+                getSystemOS() !== 'Linux'
+              "
+            >
+              <div class="flex items-center gap-2 justify-start w-full">
+                <UInput
+                  v-model="pathFileZip"
+                  placeholder="Ruta del Archivo Zip (Mod)"
+                  class="w-full"
+                />
                 <UButton
-                  variant="outline"
-                  size="lg"
-                  icon="i-lucide-download"
-                  @click="hanldeModeInstallation"
+                  variant="ghost"
+                  class="w-fit h-fit"
+                  icon="i-lucide-folder-open"
+                  @click="openFilePicker('zip')"
                 >
-                  Instalar Mod
                 </UButton>
               </div>
-            </div>
-          </template>
-        </UModal>
+            </UFormField>
+            <USeparator
+              label="ó"
+              v-if="
+                pathFileZip.trim() === '' &&
+                pathFileFolder.trim() === '' &&
+                getSystemOS() !== 'MacOS' &&
+                getSystemOS() !== 'Linux'
+              "
+            />
+            <UFormField
+              label="Ruta de la carpeta del Mod"
+              class="w-full"
+              v-if="pathFileZip.trim() === ''"
+            >
+              <div class="flex items-center gap-2 justify-start w-full">
+                <UInput
+                  v-model="pathFileFolder"
+                  placeholder="Ruta de la carpeta del Mod"
+                  class="w-full"
+                />
+                <UButton
+                  variant="ghost"
+                  class="w-fit h-fit"
+                  icon="i-lucide-folder-open"
+                  @click="openFilePicker('folder')"
+                >
+                </UButton>
+              </div>
+            </UFormField>
+          </UContainer>
 
-        <UButton variant="outline" size="xl" icon="i-lucide-book-plus">
-        </UButton>
+          <UButton
+            variant="outline"
+            size="lg"
+            icon="i-lucide-download"
+            @click="hanldeModeInstallation"
+          >
+            Instalar Mod
+          </UButton>
+        </div>
       </div>
-    </UContainer>
-  </UCard>
+    </template>
+  </UModal>
 </template>
 
 <script setup lang="ts">

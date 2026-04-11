@@ -75,6 +75,9 @@ export const Filespc = () => {
     ipcMain.handle(ENDPOINTS.files.copy.internal.directory, async (_, data) => {
         return await filesRepository.copyInternalDirectory(data.source, data.destination);
     });
+    ipcMain.handle(ENDPOINTS.files.copy.internal.toInternal, async (_, data) => {
+        return await filesRepository.copyToInternalDirectory(data.source, data.destination);
+    });
     /* endpoint para descomprimir archivos */
     ipcMain.handle(ENDPOINTS.files.unzip.file, async (_, data) => {
         return await filesRepository.unzipFile(data.zipPath, data.extractTo);

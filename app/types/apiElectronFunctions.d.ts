@@ -18,6 +18,10 @@ interface FilesApi {
         source: string,
         destination: string,
       ) => Promise<ApiResponseDB>;
+      toInternal: (
+        source: string,
+        destination: string,
+      ) => Promise<ApiResponseDB>;
     };
     directory: (source: string, destination: string) => Promise<ApiResponseDB>;
   };

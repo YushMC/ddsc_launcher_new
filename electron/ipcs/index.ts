@@ -169,6 +169,19 @@ export const Filespc = () => {
       );
     },
   );
+
+  ipcMain.handle(
+    ENDPOINTS.files.copy.internal.toInternal,
+    async (
+      _,
+      data: { source: string; destination: string },
+    ): Promise<ApiResponseDB> => {
+      return await filesRepository.copyToInternalDirectory(
+        data.source,
+        data.destination,
+      );
+    },
+  );
   /* endpoint para descomprimir archivos */
 
   ipcMain.handle(

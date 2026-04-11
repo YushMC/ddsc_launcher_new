@@ -40,6 +40,7 @@ const ENDPOINTS = {
       internal: {
         file: "files/copy/internal/file",
         directory: "files/copy/internal/directory",
+        toInternal: "files/copy/internal/to-internal",
       },
     },
     create: {
