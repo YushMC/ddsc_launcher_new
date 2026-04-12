@@ -1,8 +1,8 @@
 const CONST_KEYS = {
   DDLC_FOLDER: {
-    windows: "ddlc-windows",
+    windows: "ddlc-win-linux",
     macos: "ddlc-mac",
-    linux: "ddlc-linux",
+    linux: "ddlc-win-linux",
   },
 } as const;
 

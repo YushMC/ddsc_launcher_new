@@ -118,10 +118,11 @@
 </template>
 
 <script setup lang="ts">
+import type { SystemName } from "~/types/systemData";
 const { getSystemOS } = useSO();
 const toast = useToast();
 const isDDLCExist = ref<boolean>(false);
-const osName = ref<string | null>(null);
+const osName = ref<SystemName | null>(null);
 const typeofFileSelected = ref<"zip" | "folder" | null>(null);
 const pathSelected = ref<string>("");
 
@@ -153,7 +154,9 @@ const handleSelectFile = async (type: "zip" | "folder") => {
 const unzipDDLCFileZip = async () => {
   try {
     const osFolderName =
-      osName.value === "windows" ? "ddlc-windows" : "ddlc-mac";
+      osName.value === "Windows" || osName.value === "Linux"
+        ? "ddlc-win-linux"
+        : "ddlc-mac";
     const isDDLCExist = await window.api.files.check(osFolderName);
 
     if (isDDLCExist?.data) {
@@ -229,7 +232,9 @@ const handleCopyFile = async () => {
     } else if (typeofFileSelected.value === "folder") {
       await window.api.files.copy.internal.toInternal(
         pathSelected.value,
-        osName.value === "windows" ? "ddlc-windows" : "ddlc-mac",
+        osName.value === "Windows" || osName.value === "Linux"
+          ? "ddlc-win-linux"
+          : "ddlc-mac",
       );
     }
 
