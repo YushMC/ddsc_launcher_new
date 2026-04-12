@@ -11,38 +11,85 @@ const userDataPath = app.getPath("userData");
 
 const filesRepository = {
   /* Utilidades para rutas */
+  listFilesInExternalDirectory: async (
+    directoryPath: string,
+  ): Promise<ApiResponseDB<string[]>> => {
+    try {
+      const files = await fs.readdir(path.normalize(directoryPath));
+      return returnObjetToResponseApi(
+        true,
+        "Archivos listados exitosamente",
+        files,
+      );
+    } catch (error) {
+      console.error("Error in listFilesInExternalDirectory:", error);
+      return returnObjetToResponseApi(
+        false,
+        "Error al listar los archivos",
+        [],
+      );
+    }
+  },
+
+  listFilesInInternalDirectory: async (
+    directoryPath: string,
+  ): Promise<ApiResponseDB<string[]>> => {
+    try {
+      const files = await fs.readdir(path.normalize(directoryPath));
+      return returnObjetToResponseApi(
+        true,
+        "Archivos listados exitosamente",
+        files,
+      );
+    } catch (error) {
+      console.error("Error in listFilesInInternalDirectory:", error);
+      return returnObjetToResponseApi(
+        false,
+        "Error al listar los archivos",
+        [],
+      );
+    }
+  },
+
   joinPaths: (...paths: string[]): string => {
     return path.join(...paths);
   },
 
   /* Métodos para manejo de archivos y directorios */
-  checkDirectoryExists: async (
-    pathTemp: string,
-  ): Promise<ApiResponseDB<boolean>> => {
+
+  checkDirectoryExists: async (pathTemp: string) => {
     try {
+      const finalPath = path.isAbsolute(pathTemp)
+        ? pathTemp
+        : path.join(userDataPath, pathTemp);
+
       const exists = await fs
-        .access(path.join(userDataPath, pathTemp))
+        .access(finalPath)
         .then(() => true)
         .catch(() => false);
-      console.log("Directory check result for", pathTemp, ":", exists);
-      return returnObjetToResponseApi(
-        true,
-        "Verificación de directorio exitosa",
-        exists,
-      );
+
+      console.log("Checking path:", finalPath);
+      console.log("Exists:", exists);
+
+      return returnObjetToResponseApi(true, "OK", exists);
     } catch (error) {
-      console.error("Error in checkDirectoryExists:", error);
-      return returnObjetToResponseApi(
-        false,
-        "Error al verificar el directorio",
-        false,
-      );
+      console.error(error);
+      return returnObjetToResponseApi(false, "Error", false);
     }
   },
   createDirectory: async (pathTemp: string): Promise<ApiResponseDB> => {
     try {
+      console.log("Attempting to create directory at", pathTemp);
+      console.log("User path for directory creation:", userDataPath);
+      console.log(
+        "Full path for directory creation:",
+        path.join(userDataPath, pathTemp),
+      );
       await fs.mkdir(path.join(userDataPath, pathTemp), { recursive: true });
-      console.log("Directory created successfully at", pathTemp);
+      console.log(
+        "Directory created successfully at",
+        path.join(userDataPath, pathTemp),
+      );
       return returnObjetToResponseApi(
         true,
         "Directorio creado exitosamente",
@@ -205,16 +252,15 @@ const filesRepository = {
         await filesRepository.checkDirectoryExists(normalizedDestination);
 
       if (!checkIFExistsFolderDestination?.data) {
-        const createDirResponse = await filesRepository.createDirectory(
+        console.log(
+          "Destination internal directory does not exist, cannot copy",
           normalizedDestination,
         );
-        if (!createDirResponse.success) {
-          return returnObjetToResponseApi(
-            false,
-            "Error al crear el directorio de destino interno",
-            null,
-          );
-        }
+        return returnObjetToResponseApi(
+          false,
+          "El directorio de destino no existe",
+          null,
+        );
       }
 
       await fs.cp(normalizedSource, normalizedDestination, {
@@ -354,6 +400,55 @@ const filesRepository = {
       return returnObjetToResponseApi(
         false,
         "Error al descomprimir el archivo",
+        null,
+      );
+    }
+  },
+  /* Métodos para eliminar archivos o directorio */
+  deleteFile: async (filePath: string): Promise<ApiResponseDB> => {
+    try {
+      const fullPath = path.isAbsolute(filePath)
+        ? filePath
+        : path.join(userDataPath, filePath);
+
+      await fs.rm(fullPath, { force: true });
+
+      console.log("File deleted successfully:", fullPath);
+
+      return returnObjetToResponseApi(
+        true,
+        "Archivo eliminado exitosamente",
+        null,
+      );
+    } catch (error) {
+      console.error("Error in deleteFile:", error);
+      return returnObjetToResponseApi(
+        false,
+        "Error al eliminar el archivo",
+        null,
+      );
+    }
+  },
+  deleteDirectory: async (dirPath: string): Promise<ApiResponseDB> => {
+    try {
+      const fullPath = path.isAbsolute(dirPath)
+        ? dirPath
+        : path.join(userDataPath, dirPath);
+
+      await fs.rm(fullPath, { recursive: true, force: true });
+
+      console.log("Directory deleted successfully:", fullPath);
+
+      return returnObjetToResponseApi(
+        true,
+        "Directorio eliminado exitosamente",
+        null,
+      );
+    } catch (error) {
+      console.error("Error in deleteDirectory:", error);
+      return returnObjetToResponseApi(
+        false,
+        "Error al eliminar el directorio",
         null,
       );
     }

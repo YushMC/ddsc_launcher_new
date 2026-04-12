@@ -14,7 +14,9 @@ const AllModsQuerys = {
 const prepareQueryWraper = (query: string) => {
   const db = getDatabase();
   if (!db) {
-    throw new Error("Base de datos no inicializada. Por favor, reinicia la aplicación.");
+    throw new Error(
+      "Base de datos no inicializada. Por favor, reinicia la aplicación.",
+    );
   }
 
   return prepareQuery(query, db);

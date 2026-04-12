@@ -43,42 +43,9 @@
             v-if="modId"
           >
             <UFormField
-              label="Ruta del Archivo Zip (Mod)"
-              class="w-full"
-              v-if="
-                pathFileFolder.trim() === '' &&
-                getSystemOS() !== 'MacOS' &&
-                getSystemOS() !== 'Linux'
-              "
-            >
-              <div class="flex items-center gap-2 justify-start w-full">
-                <UInput
-                  v-model="pathFileZip"
-                  placeholder="Ruta del Archivo Zip (Mod)"
-                  class="w-full"
-                />
-                <UButton
-                  variant="ghost"
-                  class="w-fit h-fit"
-                  icon="i-lucide-folder-open"
-                  @click="openFilePicker('zip')"
-                >
-                </UButton>
-              </div>
-            </UFormField>
-            <USeparator
-              label="ó"
-              v-if="
-                pathFileZip.trim() === '' &&
-                pathFileFolder.trim() === '' &&
-                getSystemOS() !== 'MacOS' &&
-                getSystemOS() !== 'Linux'
-              "
-            />
-            <UFormField
               label="Ruta de la carpeta del Mod"
               class="w-full"
-              v-if="pathFileZip.trim() === ''"
+              v-if="pathFileFolder.trim() === ''"
             >
               <div class="flex items-center gap-2 justify-start w-full">
                 <UInput
@@ -90,7 +57,7 @@
                   variant="ghost"
                   class="w-fit h-fit"
                   icon="i-lucide-folder-open"
-                  @click="openFilePicker('folder')"
+                  @click="openFilePicker"
                 >
                 </UButton>
               </div>
@@ -118,28 +85,20 @@ import CONST_KEYS from "~/utils/constants";
 const toast = useToast();
 const osName = ref<SystemName | null>(null);
 const { getSystemOS, getIdUser, getDirectoryName } = useSO();
-const { installModWithModeFolder, installModWithZipFile } = useInstallation();
+const { installModWithModeFolder } = useInstallation();
 const { registerMod } = useModApiElectron();
 const modId = ref<number | undefined>(undefined);
 const itemsMods = ref<{ label: string; value: number }[]>([]);
 
 const existsDDLCFolder = ref<boolean>(false);
 
-const pathFileZip = ref<string>("");
 const pathFileFolder = ref<string>("");
 const ModsList = ref<ModResponseInterface[]>([]);
 
-const openFilePicker = async (type: "zip" | "folder") => {
-  if (type === "zip") {
-    const filePath = await window.api.files.select.zipFile();
-    if (filePath) {
-      pathFileZip.value = filePath; // ✅ ruta absoluta real
-    }
-  } else if (type === "folder") {
-    const folderPath = await window.api.files.select.folder();
-    if (folderPath) {
-      pathFileFolder.value = folderPath; // ✅ ruta absoluta real
-    }
+const openFilePicker = async () => {
+  const folderPath = await window.api.files.select.folder();
+  if (folderPath) {
+    pathFileFolder.value = folderPath; // ✅ ruta absoluta real
   }
 };
 
@@ -215,21 +174,10 @@ const hanldeModeInstallation = async () => {
     return;
   }
 
-  if (pathFileZip.value.trim() === "" && pathFileFolder.value.trim() === "") {
+  if (pathFileFolder.value.trim() === "") {
     toast.add({
       title: "Error",
-      description:
-        "Por favor, proporciona la ruta del archivo zip o de la carpeta del mod.",
-      color: "error",
-    });
-    return;
-  }
-
-  if (pathFileZip.value.trim() !== "" && pathFileFolder.value.trim() !== "") {
-    toast.add({
-      title: "Error",
-      description:
-        "Por favor, proporciona solo una ruta: o el archivo zip o la carpeta del mod, no ambos.",
+      description: "Por favor, proporciona la ruta de la carpeta del mod.",
       color: "error",
     });
     return;
@@ -263,20 +211,12 @@ const hanldeModeInstallation = async () => {
   });
   const installationToastId = installationToast.id;
 
-  const response =
-    pathFileZip.value.trim() !== ""
-      ? await installModWithZipFile(
-          selectedMod.resource.slug.replaceAll(/-/g, "_"),
-          baseDirectory,
-          pathFileZip.value,
-          osName.value,
-        )
-      : await installModWithModeFolder(
-          selectedMod.resource.slug.replaceAll(/-/g, "_"),
-          baseDirectory,
-          pathFileFolder.value,
-          osName.value,
-        );
+  const response = await installModWithModeFolder(
+    selectedMod.resource.slug.replaceAll(/-/g, "_"),
+    baseDirectory,
+    pathFileFolder.value,
+    osName.value,
+  );
 
   if (response.success && response.finalPath) {
     const registerResponse = await registerMod({
@@ -301,9 +241,7 @@ const hanldeModeInstallation = async () => {
 
   toast.update(installationToastId, {
     title: response.success ? "Mod instalado" : "Error",
-    description: response.success
-      ? `El mod "${selectedMod.resource.name}" se ha instalado correctamente.`
-      : `Hubo un error al instalar el mod "${selectedMod.resource.name}". Por favor, intenta nuevamente.`,
+    description: String(response.message),
     icon: response.success ? "i-lucide-check" : "i-lucide-alert-circle",
     color: response.success ? "success" : "error",
     duration: 5000,

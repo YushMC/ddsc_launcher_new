@@ -33,6 +33,10 @@ const ENDPOINTS = {
   },
   files: {
     check: "files/check",
+    list: {
+      internal: "files/list/internal",
+      external: "files/list/external",
+    },
     joinPaths: "files/join-paths",
     copy: {
       file: "files/copy/file",

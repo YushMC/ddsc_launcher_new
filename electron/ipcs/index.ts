@@ -107,6 +107,18 @@ export const BDpc = () => {
 export const Filespc = () => {
   /* endpoints para archivos */
   ipcMain.handle(
+    ENDPOINTS.files.list.external,
+    async (_, filePath: string): Promise<ApiResponseDB<string[]>> => {
+      return await filesRepository.listFilesInExternalDirectory(filePath);
+    },
+  );
+  ipcMain.handle(
+    ENDPOINTS.files.list.internal,
+    async (_, filePath: string): Promise<ApiResponseDB<string[]>> => {
+      return await filesRepository.listFilesInInternalDirectory(filePath);
+    },
+  );
+  ipcMain.handle(
     ENDPOINTS.files.check,
     async (_, filePath: string): Promise<ApiResponseDB<boolean>> => {
       return await filesRepository.checkDirectoryExists(filePath);
