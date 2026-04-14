@@ -3,12 +3,12 @@ import { prepareQuery, returnObjetToResponseApi } from "../utils/querys.js";
 
 const AllModsQuerys = {
   setModData:
-    "INSERT INTO mods (name, logo, main_image, path) VALUES (@name, @logo, @main_image, @path)",
+    "INSERT INTO mods (name, mod_id_api, logo, main_image, path) VALUES (@name, @mod_id_api, @logo, @main_image, @path)",
   getDataModById: "SELECT * FROM mods WHERE id = ?",
   getAllDataMods: "SELECT * FROM mods WHERE is_active = 1",
   updateModDataById:
-    "UPDATE mods SET name = @name, logo = @logo, main_image = @main_image, path = @path, is_custom = @is_custom WHERE id = @id",
-  deleteModById: "UPDATE mods SET is_active = 0 WHERE id = @id",
+    "UPDATE mods SET name = @name, mod_id_api = @mod_id_api, logo = @logo, main_image = @main_image, path = @path, is_custom = @is_custom WHERE id = @id",
+  deleteModById: "DELETE FROM mods WHERE id = @id",
 };
 
 const prepareQueryWraper = (query: string) => {
@@ -68,6 +68,7 @@ const modRepository = {
         logo: data.logo,
         main_image: data.main_image,
         path: data.path,
+        mod_id_api: data.mod_id_api,
       });
       return returnObjetToResponseApi(true, "Mod agregado correctamente");
     } catch (error: any) {
@@ -87,6 +88,7 @@ const modRepository = {
       const queries = getQuerysPrepare();
       const result = queries.updateMod.run({
         name: data.name,
+        mod_id_api: data.mod_id_api,
         logo: data.logo,
         main_image: data.main_image,
         path: data.path,

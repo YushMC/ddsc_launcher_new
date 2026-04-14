@@ -62,8 +62,7 @@ const getCustomExecutableInList = async (
   const filesWithExeExtension = exeFilesResponse.data;
 
   const DDLCExes = filesWithExeExtension.filter(
-    (fileName) =>
-      !fileName.endsWith("-32.exe") && fileName !== "LinuxLauncher.sh",
+    (fileName) => !fileName.endsWith("-32.exe"),
   );
   if (DDLCExes.length === 0) {
     return {
@@ -82,20 +81,47 @@ const getCustomExecutableInList = async (
     };
   }
 
-  const executable = DDLCExes.find((fileName) =>
+  const executable = DDLCExes.filter((fileName) =>
     fileName.endsWith(osName === "Windows" ? ".exe" : ".sh"),
   );
 
-  if (!executable) {
+  if (executable.length === 0) {
     return {
       success: false,
       message: `No se encontró un archivo ejecutable compatible con el sistema operativo (${osName}) en la carpeta.`,
     };
   }
 
+  if (osName === "Linux") {
+    const linuxLauncher = DDLCExes.find((fileName) =>
+      fileName.endsWith("auncher.sh"),
+    );
+    if (linuxLauncher) {
+      return {
+        success: true,
+        data: linuxLauncher,
+      };
+    } else {
+      const DDLCLinuxSh = DDLCExes.find((fileName) => fileName.endsWith(".sh"));
+      if (DDLCLinuxSh) {
+        return {
+          success: true,
+          data: DDLCLinuxSh,
+        };
+      }
+    }
+  }
+
+  const WindowsExe = executable.find((fileName) => fileName.endsWith(".exe"));
+  if (WindowsExe) {
+    return {
+      success: true,
+      data: WindowsExe,
+    };
+  }
   return {
-    success: true,
-    data: executable,
+    success: false,
+    message: `No se encontró un archivo ejecutable compatible con el sistema operativo (${osName}) en la carpeta.`,
   };
 };
 

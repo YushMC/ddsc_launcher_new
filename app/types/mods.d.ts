@@ -1,5 +1,6 @@
 interface ModInterface {
   id: number;
+  mod_id_api: number;
   name: string;
   logo: string;
   main_image: string;

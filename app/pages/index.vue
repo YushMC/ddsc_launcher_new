@@ -1,114 +1,291 @@
 <template>
-  <div
-    class="flex w-full h-full items-center gap-5 p-1 justify-center flex-col"
-  >
-    <h1 class="text-2xl font-bold">¿Quíen Jugará Hoy?</h1>
-    <div
-      class="w-fit h-fit p-0 m-0 flex max-w-[90%] max-h-[90%] items-center gap-5 justify-center flex-wrap"
-    >
-      <UTooltip
-        v-for="(value, index) in profiles"
-        :key="index"
-        :text="value.username"
+  <div class="w-full flex flex-col relative">
+    <div class="w-full flex items-start justify-center relative">
+      <!-- SIDEBAR -->
+      <div
+        class="w-[500px] overflow-y-auto overflow-x-hidden sticky top-0 max-h-[92dvh]"
       >
-        <UAvatar
-          class="object-cover cursor-pointer rounded-md"
-          size="3xl"
-          :alt="value.username"
-          @click="goToHome(value.id)"
-        />
-      </UTooltip>
-      <UModal title="Crear Nuevo Perfil">
-        <UTooltip text="Nuevo Perfil">
-          <UAvatar
-            alt="+"
-            size="3xl"
-            class="object-cover cursor-pointer rounded-md"
-          />
-        </UTooltip>
-        <template #body>
-          <div class="flex flex-col gap-4">
-            <UFormField label="Nombre de Usuario">
-              <UInput
-                v-model="newProfileName"
-                placeholder="Nombre de Usuario"
-                class="rounded-md w-full"
-              />
-            </UFormField>
+        <UCard
+          class="w-full h-fit p-0 m-0 flex flex-col mb-5 sticky top-0 z-10"
+        >
+          <UFormField label="Buscar mod">
+            <UInput
+              v-model="searchName"
+              placeholder="Buscar mod por nombre..."
+              class="w-[300px]"
+            />
+          </UFormField>
+        </UCard>
 
-            <UButton
-              variant="soft"
-              icon="i-lucide-user-plus"
-              @click="handleRegisterUser"
+        <UContainer class="flex w-full flex-col p-2">
+          <div class="w-full flex flex-col gap-5">
+            <div
+              v-if="filteredMods.length > 0"
+              v-for="mod in filteredMods"
+              :key="mod.id"
+              class="w-full h-[200px] flex transition-all duration-300 ease-in-out rounded-md relative ring-4"
+              :class="
+                modDetails?.id === mod.mod_id_api ? 'ring-primary ml-3' : ''
+              "
             >
-              Crear Perfil</UButton
-            >
+              <UTooltip :text="mod.name">
+                <div class="w-full h-full relative">
+                  <NuxtImg
+                    :src="mod.main_image"
+                    :alt="mod.name"
+                    class="object-cover cursor-pointer rounded-md w-full h-full"
+                    @click="setDataMod(mod.mod_id_api)"
+                  />
+
+                  <UButton
+                    color="primary"
+                    icon="i-lucide-play"
+                    :ui="{ base: 'text-white' }"
+                    @click="handleRunApp(mod)"
+                    variant="solid"
+                    size="xl"
+                    class="absolute bottom-2 right-2 z-10"
+                    :class="
+                      modDetails?.id === mod.mod_id_api ? 'flex' : 'hidden'
+                    "
+                  />
+                </div>
+              </UTooltip>
+            </div>
+            <div v-else>
+              <UAlert
+                title="Importante"
+                description="No se han encontrado mods que coincidan con tu búsqueda. Por favor, intenta con otro nombre "
+                class="w-full"
+                variant="soft"
+                color="warning"
+                icon="i-lucide-triangle-alert"
+              />
+            </div>
           </div>
-        </template>
-      </UModal>
+        </UContainer>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="w-full flex items-start justify-start border-left p-5">
+        <div
+          v-if="modDetails"
+          class="w-full h-full p-4 flex flex-col gap-3 justify-start items-start"
+        >
+          <h2 class="text-xl font-bold">{{ modDetails.name }}</h2>
+
+          <UCarousel
+            v-slot="{ item }"
+            class="w-full mb-5"
+            :items="modDetails.images"
+            arrows
+            dots
+            :ui="{
+              item: 'basis-1/3 ps-0 ',
+              prev: 'sm:start-8',
+              next: 'sm:end-8',
+              container: 'ms-0 ',
+            }"
+          >
+            <NuxtImg
+              :src="item.url"
+              :alt="modDetails.name"
+              class="rounded-md object-contain w-full aspect-video"
+              loading="lazy"
+            />
+          </UCarousel>
+          <ModsTags
+            :generes="modDetails.genres.map((g) => g.name)"
+            :status="modDetails.status"
+            :duration="modDetails.duration"
+            :character="modDetails.character"
+          />
+
+          <UCard variant="soft" class="flex flex-col gap-5 w-full">
+            <div>
+              <UButton icon="i-lucide-play" size="xl" color="info">
+                Lanzar Mod</UButton
+              >
+            </div>
+            <div
+              class="w-full max-h-[20dvh] overflow-y-auto overflow-x-hidden p-2 rounded-md"
+              v-html="modDetails.description"
+            ></div>
+          </UCard>
+        </div>
+        <div
+          class="w-full min-h-[50dvh] flex justify-center items-center gap-5"
+          v-else
+        >
+          <div
+            class="w-full h-full flex items-center justify-center flex-col gap-5"
+          >
+            <h1 class="text-3xl font-bold">Bienvenido</h1>
+            <p>Selecciona un mod de la izquierda para ver sus detalles aquí.</p>
+            <NuxtImg
+              src="https://www.dokidokispanish.club/images/404.webp"
+              alt="Logo DDSC"
+              width="500"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- FLOATING BUTTONS -->
+    <UContainer class="w-fit fixed bottom-5 right-2 flex gap-5 z-10">
+      <Instalacion v-if="!existsDDLCFolder" />
+      <Mods />
+    </UContainer>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { SystemName } from "~/types/systemData";
+
+const { checkFile, createDirectory, runFileMacOS, runFileWindows } =
+  useFilesApiElectron();
+const { getAllMods, getModByIdApi } = useModApiElectron();
+const { getSystemOS } = useSO();
 const toast = useToast();
-const { setIdUser } = useSO();
-const { getAllUsers, registerUser } = useUserApiElectron();
 
-definePageMeta({
-  layout: "profile",
-});
-const newProfileName = ref("");
+const modsToPlay = ref<ModDBInterface[]>([]);
+const searchName = ref("");
+const modDetails = ref<ModInterfaceApi | null>(null);
+const osName = ref<SystemName | null>(null);
+const existsDDLCFolder = ref<boolean>(false);
+const directoryName = ref("user");
 
-const goToHome = (id: number) => {
-  setIdUser(id);
-  navigateTo("/home");
-};
+const initializeUserDirectory = async () => {
+  directoryName.value = `user_data`;
 
-const profiles = ref<{ username: string; id: number }[]>([]);
+  const response = await checkFile(directoryName.value);
 
-const handleRegisterUser = async () => {
-  try {
-    const response = await registerUser(newProfileName.value);
-    if (response.success) {
-      toast.add({
-        title: "Usuario registrado",
-        description: `El usuario ${newProfileName.value} ha sido registrado exitosamente.`,
-        color: "success",
-      });
-    } else {
-      toast.add({
-        title: "Error al registrar el usuario",
-        description: String(response.message),
-        color: "error",
-      });
+  if (response.success && !response.data) {
+    const responseCreate = await createDirectory(directoryName.value);
+    if (responseCreate.success) {
+      directoryName.value = directoryName.value;
     }
-  } catch (error) {
-    toast.add({
-      title: "Error al registrar el usuario",
-      description: `Error: ${String(error)}`,
-      color: "error",
-    });
-  } finally {
-    newProfileName.value = "";
+    const toastConfig = {
+      title: responseCreate.success
+        ? "Directorio creado correctamente"
+        : "Error al crear el directorio",
+      description: String(responseCreate.message),
+      color: responseCreate.success ? ("success" as const) : ("error" as const),
+    };
+    toast.add(toastConfig);
   }
 };
 
-onMounted(async () => {
-  try {
-    const response = await getAllUsers();
-    if (response.success && response.data) {
-      profiles.value = response.data.map((user) => ({
-        username: user.username,
-        id: user.id,
-      }));
-    } else {
-      console.error("Error al obtener los usuarios:", response.message);
-    }
-  } catch (error) {
-    console.error("Error al obtener los usuarios:", error);
+const handleRunApp = async (mod: ModDBInterface) => {
+  if (!osName.value) {
+    return;
+  }
+
+  let response;
+
+  switch (osName.value) {
+    case "Windows":
+      response = await runFileWindows(mod.path);
+      break;
+    case "MacOS":
+      response = await runFileMacOS(mod.path);
+      break;
+    default:
+      toast.add({
+        title: "Sistema operativo no soportado",
+        description: `Tu sistema operativo (${osName.value}) no es compatible con esta función.`,
+        color: "error",
+      });
+  }
+
+  if (response && !response.success) {
+    toast.add({
+      title: "Error al ejecutar el mod",
+      description: String(response.message),
+      color: "error",
+    });
+  }
+  if (response && response.success) {
+    toast.add({
+      title: "Mod ejecutado correctamente",
+      description: `El mod "${mod.name}" se ha ejecutado exitosamente.`,
+      color: "success",
+    });
+  }
+};
+
+const setDataMod = async (id: number) => {
+  const response = await getModByIdApi(id);
+  if (response?.sucess && response.data) {
+    modDetails.value = response.data;
+  } else {
+    toast.add({
+      title: "Error al cargar los detalles del mod",
+      description: String(response?.message || "Error desconocido"),
+      color: "error",
+    });
+  }
+};
+
+const checkIFDDLCFolderExists = async (osName: SystemName) => {
+  let response: ApiResponseDB<boolean>;
+  switch (osName) {
+    case "Windows":
+      response = await window.api.files.check(CONST_KEYS.DDLC_FOLDER.windows);
+      break;
+    case "Linux":
+      response = await window.api.files.check(CONST_KEYS.DDLC_FOLDER.linux);
+      break;
+    case "MacOS":
+      response = await window.api.files.check(CONST_KEYS.DDLC_FOLDER.macos);
+      console.log("Response checking DDLC folder on MacOS:", response);
+      break;
+    default:
+      throw new Error("Sistema operativo no soportado");
+  }
+  return response;
+};
+
+const filteredMods = computed(() => {
+  if (!searchName.value) {
+    return modsToPlay.value;
+  }
+  return modsToPlay.value.filter((mod) =>
+    mod.name.toLowerCase().includes(searchName.value.toLowerCase()),
+  );
+});
+
+const updateModsList = async () => {};
+
+onBeforeMount(async () => {
+  await initializeUserDirectory();
+  osName.value = getSystemOS();
+  if (!osName.value) {
+    toast.add({
+      title: "Error al detectar el sistema operativo",
+      description:
+        "No se pudo determinar tu sistema operativo. Por favor, intenta nuevamente.",
+      color: "error",
+    });
+    navigateTo("/");
+    return;
+  }
+  const responseDirectoryDDLC = await checkIFDDLCFolderExists(osName.value);
+  if (responseDirectoryDDLC.success && responseDirectoryDDLC.data) {
+    existsDDLCFolder.value = responseDirectoryDDLC.data;
+  }
+  const response = await getAllMods();
+  if (response.success && response.data) {
+    modsToPlay.value = response.data;
+  } else {
+    toast.add({
+      title: "Error al cargar los mods",
+      description: String(response.message),
+      color: "error",
+    });
   }
 });
 </script>
-
-<style scoped></style>

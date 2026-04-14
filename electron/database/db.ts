@@ -51,6 +51,7 @@ export const initializeDatabase = (): {
     dbInstance.exec(`
       CREATE TABLE IF NOT EXISTS mods (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        mod_id_api INTEGER,
         name TEXT NOT NULL,
         logo TEXT NOT NULL,
         main_image TEXT NOT NULL,

@@ -1,4 +1,4 @@
-interface ModInterface {
+interface ModInterfaceApi {
   id: number;
   name: string;
   description: string;
@@ -10,6 +10,7 @@ interface ModInterface {
   type: string;
   slug: string;
   images: ImagesInterface[];
+  genres: GenderMods[];
   download_pc: string | null;
   download_android: string | null;
   required_revision: boolean;
@@ -17,7 +18,7 @@ interface ModInterface {
 }
 
 interface ModResponseInterface {
-  resource: ModInterface;
+  resource: ModInterfaceApi;
   info: InfoInterface;
 }
 
@@ -31,6 +32,7 @@ interface ImagesInterface {
 
 interface ModDBInterface {
   id: number;
+  mod_id_api: number;
   name: string;
   logo: string;
   main_image: string;

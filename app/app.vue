@@ -33,3 +33,9 @@ onBeforeMount(() => {
     </NuxtLayout>
   </UApp>
 </template>
+
+<style lang="css">
+body {
+  /* background: #2d1739 !important; */
+}
+</style>

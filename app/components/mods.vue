@@ -1,7 +1,7 @@
 <template>
   <UModal title="Agregar Mod" :closeable="true">
     <UTooltip text="Agregar un nuevo mod ">
-      <UButton variant="outline" size="xl" icon="i-lucide-book-plus">
+      <UButton variant="solid" size="xl" icon="i-lucide-book-plus">
         Add Mod
       </UButton>
     </UTooltip>
@@ -221,6 +221,7 @@ const hanldeModeInstallation = async () => {
   if (response.success && response.finalPath) {
     const registerResponse = await registerMod({
       name: selectedMod.resource.name,
+      mod_id_api: selectedMod.resource.id,
       logo:
         selectedMod.resource.images.find((img) => img.type === "logo")?.url ||
         "",
@@ -246,13 +247,10 @@ const hanldeModeInstallation = async () => {
     color: response.success ? "success" : "error",
     duration: 5000,
   });
+  window.location.reload(); // Recarga la página para actualizar la lista de mods instalados
 };
 
 onBeforeMount(async () => {
-  if (getIdUser() === null) {
-    navigateTo("/");
-    return;
-  }
   osName.value = getSystemOS();
   if (osName.value) {
     const response = await checkIFDDLCFolderExists(osName.value);
