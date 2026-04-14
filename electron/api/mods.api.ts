@@ -3,7 +3,7 @@ import { prepareQuery, returnObjetToResponseApi } from "../utils/querys.js";
 
 const AllModsQuerys = {
   setModData:
-    "INSERT INTO mods (name, mod_id_api, logo, main_image, path) VALUES (@name, @mod_id_api, @logo, @main_image, @path)",
+    "INSERT INTO mods (name, mod_id_api, logo, main_image, path, name_folder) VALUES (@name, @mod_id_api, @logo, @main_image, @path, @name_folder)",
   getDataModById: "SELECT * FROM mods WHERE id = ?",
   getAllDataMods: "SELECT * FROM mods WHERE is_active = 1",
   updateModDataById:
@@ -69,6 +69,7 @@ const modRepository = {
         main_image: data.main_image,
         path: data.path,
         mod_id_api: data.mod_id_api,
+        name_folder: data.name_folder,
       });
       return returnObjetToResponseApi(true, "Mod agregado correctamente");
     } catch (error: any) {

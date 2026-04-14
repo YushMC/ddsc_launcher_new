@@ -14,6 +14,10 @@ interface FilesApi {
     external: (filePath: string) => Promise<ApiResponseDB<string[]>>;
     internal: (filePath: string) => Promise<ApiResponseDB<string[]>>;
   };
+  delete: {
+    file: (filePath: string) => Promise<ApiResponseDB>;
+    directory: (directoryPath: string) => Promise<ApiResponseDB>;
+  };
   copy: {
     file: (source: string, destination: string) => Promise<ApiResponseDB>;
     internal: {

@@ -47,7 +47,7 @@ const active = ref("0");
 
 watch(active, (newValue) => {
   if (newValue === "0") {
-    navigateTo("/home");
+    navigateTo("/");
   } else if (newValue === "1") {
     navigateTo("/mods");
   }
@@ -67,10 +67,12 @@ const open = ref(false);
 
 defineShortcuts({
   meta_1: () => {
+    active.value = "0";
     navigateTo("/");
   },
   meta_2: () => {
-    navigateTo("/home");
+    active.value = "1";
+    navigateTo("/mods");
   },
 });
 const route = useRoute();

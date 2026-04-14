@@ -208,6 +208,7 @@ const unzipFileFile = async (zipPath: string, destination: string) => {
 };
 
 const installModWithModeFolder = async (
+  isRequiredDeleteFileScripts: boolean,
   modName: string,
   baseDirectory: string,
   pathFileFolder: string,
@@ -262,6 +263,7 @@ const installModWithModeFolder = async (
   );
 
   if (!ddlcFolderDirectory.success) {
+    await window.api.files.delete.directory(modFolder.path);
     return {
       success: false,
       message: `Error creating DDLC directory: ${ddlcFolderDirectory.message}`,
@@ -283,10 +285,33 @@ const installModWithModeFolder = async (
     ddlcFolderDirectory.path,
   );
   if (!copyDDLCResponse.success) {
+    await window.api.files.delete.directory(modFolder.path);
     return {
       success: false,
       message: `Error copying DDLC files: ${copyDDLCResponse.message}`,
     };
+  }
+  if (isRequiredDeleteFileScripts) {
+    const filesToDelete =
+      osName === "MacOS"
+        ? await window.api.files.joinPaths(
+            modFolder.path,
+            "ddlc-mac",
+            "DDLC.app",
+            "Contents",
+            "Resources",
+            "autorun",
+            "game",
+            "scripts.rpa",
+          )
+        : await window.api.files.joinPaths(
+            modFolder.path,
+            "ddlc-win-linux",
+            "DDLC-1.1.1-pc",
+            "game",
+            "scripts.rpa",
+          );
+    await window.api.files.delete.file(filesToDelete);
   }
   /* Copiado de los archivos del mod a la carpeta del mod */
   let pathToDestino = modFolder.path;
@@ -309,6 +334,7 @@ const installModWithModeFolder = async (
 
   const copyResponse = await copyDirectoryFiles(pathFileFolder, pathToDestino);
   if (!copyResponse.success) {
+    await window.api.files.delete.directory(modFolder.path);
     return {
       success: false,
       message: `Error copying files: ${copyResponse.message}`,

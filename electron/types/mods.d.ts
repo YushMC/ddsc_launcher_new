@@ -1,5 +1,6 @@
 interface ModInterface {
   id: number;
+  name_folder: string;
   mod_id_api: number;
   name: string;
   logo: string;

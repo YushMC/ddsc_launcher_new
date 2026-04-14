@@ -18,10 +18,10 @@
 
       <div v-else class="flex flex-col gap-5 w-full">
         <UAlert
-          v-if="getSystemOS() === 'MacOS' || getSystemOS() === 'Linux'"
+          v-if="getSystemOS() === 'MacOS'"
           title="IMPORTANTE"
           variant="soft"
-          :description="`Para ${getSystemOS()}, no se podrán ejecutar mods con archivos .exe propios, por lo que solo se podrán ejecutar mods que sean modificaciones de archivos del juego original.`"
+          :description="`Para ${getSystemOS()}, no se podrán ejecutar mods con ejecutables propios, por lo que solo se podrán ejecutar mods que sean modificaciones de archivos del juego original.`"
           icon="i-lucide-triangle-alert"
           class="mb-5"
           color="warning"
@@ -42,11 +42,7 @@
             variant="soft"
             v-if="modId"
           >
-            <UFormField
-              label="Ruta de la carpeta del Mod"
-              class="w-full"
-              v-if="pathFileFolder.trim() === ''"
-            >
+            <UFormField label="Ruta de la carpeta del Mod" class="w-full">
               <div class="flex items-center gap-2 justify-start w-full">
                 <UInput
                   v-model="pathFileFolder"
@@ -63,8 +59,25 @@
               </div>
             </UFormField>
           </UContainer>
+          <UCard
+            variant="soft"
+            v-if="pathFileFolder.trim() !== ''"
+            class="flex items-center justify-center w-full border border-muted rounded-md gap-5"
+          >
+            <h1>
+              ¿Es necesario eliminar alguno de los siguientes archivos de
+              scripts?
+            </h1>
+            <UFormField
+              label="Eliminar Scripts.rpa"
+              class="flex items-center justify-evenly w-full"
+            >
+              <UCheckbox v-model="isRequiredDeleteFileScripts" />
+            </UFormField>
+          </UCard>
 
           <UButton
+            v-if="pathFileFolder.trim() !== ''"
             variant="outline"
             size="lg"
             icon="i-lucide-download"
@@ -87,6 +100,7 @@ const osName = ref<SystemName | null>(null);
 const { getSystemOS, getIdUser, getDirectoryName } = useSO();
 const { installModWithModeFolder } = useInstallation();
 const { registerMod } = useModApiElectron();
+const isRequiredDeleteFileScripts = ref(false);
 const modId = ref<number | undefined>(undefined);
 const itemsMods = ref<{ label: string; value: number }[]>([]);
 
@@ -212,6 +226,7 @@ const hanldeModeInstallation = async () => {
   const installationToastId = installationToast.id;
 
   const response = await installModWithModeFolder(
+    isRequiredDeleteFileScripts.value,
     selectedMod.resource.slug.replaceAll(/-/g, "_"),
     baseDirectory,
     pathFileFolder.value,
@@ -222,6 +237,7 @@ const hanldeModeInstallation = async () => {
     const registerResponse = await registerMod({
       name: selectedMod.resource.name,
       mod_id_api: selectedMod.resource.id,
+      name_folder: `mod_${selectedMod.resource.slug.replaceAll(/-/g, "_")}`,
       logo:
         selectedMod.resource.images.find((img) => img.type === "logo")?.url ||
         "",
@@ -232,6 +248,9 @@ const hanldeModeInstallation = async () => {
     });
 
     if (!registerResponse.success) {
+      await window.api.files.delete.directory(
+        `user_data/${selectedMod.resource.slug.replaceAll(/-/g, "_")}`,
+      ); // Elimina los archivos copiados si no se pudo registrar el mod en la base de datos
       toast.add({
         title: "Error",
         description: `Error registering mod in database: ${registerResponse.message}`,

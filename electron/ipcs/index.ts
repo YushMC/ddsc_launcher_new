@@ -194,6 +194,20 @@ export const Filespc = () => {
       );
     },
   );
+
+  ipcMain.handle(
+    ENDPOINTS.files.delete.file,
+    async (_, filePath: string): Promise<ApiResponseDB> => {
+      return await filesRepository.deleteFile(filePath);
+    },
+  );
+
+  ipcMain.handle(
+    ENDPOINTS.files.delete.directory,
+    async (_, directoryPath: string): Promise<ApiResponseDB> => {
+      return await filesRepository.deleteDirectory(directoryPath);
+    },
+  );
   /* endpoint para descomprimir archivos */
 
   ipcMain.handle(

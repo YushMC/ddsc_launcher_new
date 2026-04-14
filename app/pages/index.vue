@@ -34,7 +34,7 @@
                     :src="mod.main_image"
                     :alt="mod.name"
                     class="object-cover cursor-pointer rounded-md w-full h-full"
-                    @click="setDataMod(mod.mod_id_api)"
+                    @click="setDataMod(mod)"
                   />
 
                   <UButton
@@ -102,9 +102,22 @@
           />
 
           <UCard variant="soft" class="flex flex-col gap-5 w-full">
-            <div>
-              <UButton icon="i-lucide-play" size="xl" color="info">
+            <div v-if="modToPlay" class="flex items-center justify-start gap-5">
+              <UButton
+                icon="i-lucide-play"
+                size="xl"
+                color="info"
+                @click="handleRunApp(modToPlay)"
+              >
                 Lanzar Mod</UButton
+              >
+              <UButton
+                icon="i-lucide-trash"
+                size="xl"
+                color="error"
+                @click="handleDeleteMod(modToPlay)"
+              >
+                Eliminar Mod</UButton
               >
             </div>
             <div
@@ -152,6 +165,7 @@ const { getSystemOS } = useSO();
 const toast = useToast();
 
 const modsToPlay = ref<ModDBInterface[]>([]);
+const modToPlay = ref<ModDBInterface | null>(null);
 const searchName = ref("");
 const modDetails = ref<ModInterfaceApi | null>(null);
 const osName = ref<SystemName | null>(null);
@@ -217,8 +231,9 @@ const handleRunApp = async (mod: ModDBInterface) => {
   }
 };
 
-const setDataMod = async (id: number) => {
-  const response = await getModByIdApi(id);
+const setDataMod = async (mod: ModDBInterface) => {
+  modToPlay.value = mod;
+  const response = await getModByIdApi(mod.mod_id_api);
   if (response?.sucess && response.data) {
     modDetails.value = response.data;
   } else {
@@ -258,7 +273,55 @@ const filteredMods = computed(() => {
   );
 });
 
-const updateModsList = async () => {};
+const handleDeleteMod = async (mod: ModDBInterface) => {
+  try {
+    if (
+      !confirm(
+        "¿Estás seguro de que deseas eliminar este mod? Esta acción no se puede deshacer.",
+      )
+    ) {
+      return;
+    }
+    const response = await window.api.mods.delete(mod.id);
+    if (response.success) {
+      const deleteFolder = await window.api.files.delete.directory(
+        `user_data/${mod.name_folder}`,
+      );
+      if (!deleteFolder.success) {
+        toast.add({
+          title: "Error al eliminar la carpeta del mod",
+          description: String(deleteFolder.message),
+          color: "error",
+        });
+        return;
+      }
+      toast.add({
+        title: "Mod eliminado",
+        description: `El mod "${mod.name}" ha sido eliminado correctamente.`,
+        color: "success",
+      });
+      // Actualizar la lista de mods después de eliminar
+      const updatedModsResponse = await getAllMods();
+      if (updatedModsResponse.success && updatedModsResponse.data) {
+        modsToPlay.value = updatedModsResponse.data;
+        modToPlay.value = null; // Limpiar los detalles del mod eliminado
+      }
+    } else {
+      toast.add({
+        title: "Error al eliminar el mod",
+        description: String(response.message),
+        color: "error",
+      });
+    }
+  } catch (error) {
+    console.error("Error al eliminar el mod:", error);
+    toast.add({
+      title: "Error al eliminar el mod",
+      description: "Ocurrió un error inesperado al intentar eliminar el mod.",
+      color: "error",
+    });
+  }
+};
 
 onBeforeMount(async () => {
   await initializeUserDirectory();

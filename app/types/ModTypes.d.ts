@@ -33,6 +33,7 @@ interface ImagesInterface {
 interface ModDBInterface {
   id: number;
   mod_id_api: number;
+  name_folder: string;
   name: string;
   logo: string;
   main_image: string;

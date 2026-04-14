@@ -66,6 +66,7 @@
               Seleccionar carpeta
             </UButton>
             <UButton
+              v-if="osName !== 'MacOS'"
               color="primary"
               variant="outline"
               icon="i-lucide-file"

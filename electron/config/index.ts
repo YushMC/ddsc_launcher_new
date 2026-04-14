@@ -33,6 +33,10 @@ const ENDPOINTS = {
   },
   files: {
     check: "files/check",
+    delete: {
+      file: "files/delete/file",
+      directory: "files/delete/directory",
+    },
     list: {
       internal: "files/list/internal",
       external: "files/list/external",

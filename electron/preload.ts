@@ -84,7 +84,12 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
       internal: (filePath: string): Promise<ApiResponseDB<string[]>> =>
         ipcRenderer.invoke(ENDPOINTS.files.list.internal, filePath),
     },
-
+    delete: {
+      file: (filePath: string): Promise<ApiResponseDB> =>
+        ipcRenderer.invoke(ENDPOINTS.files.delete.file, filePath),
+      directory: (directoryPath: string): Promise<ApiResponseDB> =>
+        ipcRenderer.invoke(ENDPOINTS.files.delete.directory, directoryPath),
+    },
     check: (path: string): Promise<ApiResponseDB> =>
       ipcRenderer.invoke(ENDPOINTS.files.check, path),
     joinPaths: (...paths: string[]): Promise<string> =>
