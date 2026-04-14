@@ -65,6 +65,7 @@ export const initializeDatabase = (): {
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT,
+        folder_path TEXT,
         is_developer INTEGER NOT NULL DEFAULT 0,
         is_active INTEGER NOT NULL DEFAULT 1
       );

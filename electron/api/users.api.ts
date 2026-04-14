@@ -2,11 +2,14 @@ import { getDatabase } from "../database/db.js";
 import { prepareQuery, returnObjetToResponseApi } from "../utils/querys.js";
 
 const AllUsersQuerys = {
-  setUserData: "INSERT INTO users (username, is_developer, is_active) VALUES (@username, @is_developer, @is_active)",
+  setUserData:
+    "INSERT INTO users (username, folder_path, is_developer, is_active) VALUES (@username, @folder_path, @is_developer, @is_active)",
   getAllUsers: "SELECT * FROM users WHERE is_active = 1 ORDER BY id DESC",
-  getUserDataById: "SELECT * FROM users WHERE id = ?",
-  updateUserUsernameById: "UPDATE users SET username = @username WHERE id = @id",
-  updateUserDeveloperModeById: "UPDATE users SET is_developer = @developer_mode WHERE id = @id",
+  getUserDataById: "SELECT * FROM users WHERE id = @id",
+  updateUserUsernameById:
+    "UPDATE users SET username = @username WHERE id = @id",
+  updateUserDeveloperModeById:
+    "UPDATE users SET is_developer = @is_developer WHERE id = @id",
 };
 
 const prepareQueryWraper = (query: string) => {
@@ -58,13 +61,14 @@ const usersRepository = {
     }
   },
 
-  create(username: string): ApiResponseDB<{ exist: boolean }> {
+  create(user: UserInterface): ApiResponseDB<{ exist: boolean }> {
     try {
       const queries = getQuerysPrepare();
       queries.insertUser.run({
-        username: username,
-        is_developer: 0,
-        is_active: 1,
+        username: user.username,
+        folder_path: user.folder_path, // Agregar la ruta de la carpeta del usuario aquí
+        is_developer: 0, // Por defecto, el nuevo usuario no es desarrollador
+        is_active: 1, // Por defecto, el nuevo usuario está activo
       });
       return returnObjetToResponseApi(true, "Usuario agregado correctamente");
     } catch (error: any) {
@@ -103,7 +107,7 @@ const usersRepository = {
     try {
       const queries = getQuerysPrepare();
       const result = queries.updateDeveloperModeByID.run({
-        developer_mode: data.developer_mode,
+        is_developer: data.is_developer,
         id: data.id,
       });
 

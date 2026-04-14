@@ -6,8 +6,16 @@ import pkg from "electron";
 const { app, dialog } = pkg;
 import path from "path";
 import { exec } from "child_process";
+import usersRepository from "./users.api.js";
 
-const userDataPath = app.getPath("userData");
+const userData = () => {
+  const response = usersRepository.getById(1);
+  if (response.success && response.data && response.data.folder_path) {
+    return response.data.folder_path;
+  }
+  return app.getPath("userData") as string;
+};
+const userDataPath: string = userData();
 
 const filesRepository = {
   /* Utilidades para rutas */

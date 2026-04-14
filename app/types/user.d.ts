@@ -1,6 +1,7 @@
 interface UserInterface {
   id: number;
   username: string;
-  developer_mode: boolean;
+  folder_path: string;
+  is_developer: boolean;
   is_active: boolean;
 }

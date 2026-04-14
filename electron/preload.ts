@@ -13,8 +13,8 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
         ipcRenderer.invoke(ENDPOINTS.users.get.all),
     },
 
-    register: (username: string): Promise<ApiResponseDB> =>
-      ipcRenderer.invoke(ENDPOINTS.users.register, username),
+    register: (user: UserInterface): Promise<ApiResponseDB> =>
+      ipcRenderer.invoke(ENDPOINTS.users.register, user),
 
     update: {
       username: (username: string): Promise<ApiResponseDB> =>

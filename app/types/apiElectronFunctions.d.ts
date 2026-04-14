@@ -57,7 +57,7 @@ interface UsersApi {
     byID: (id: number) => Promise<ApiResponseDB<UserInterface>>;
     all: () => Promise<ApiResponseDB<UserInterface[]>>;
   };
-  register: (username: string) => Promise<ApiResponseDB<{ exist: boolean }>>;
+  register: (data: UserInterface) => Promise<ApiResponseDB<{ exist: boolean }>>;
 
   update: {
     username: (data: UserInterface) => Promise<ApiResponseDB>;
