@@ -1,4 +1,4 @@
-import { promises as fs } from "fs";
+﻿import { promises as fs } from "fs";
 import { createReadStream } from "fs";
 import { returnObjetToResponseApi } from "../utils/querys.js";
 import unzipper from "unzipper";
@@ -8,14 +8,28 @@ import path from "path";
 import { exec } from "child_process";
 import usersRepository from "./users.api.js";
 
-const userData = () => {
-  const response = usersRepository.getById(1);
-  if (response.success && response.data && response.data.folder_path) {
-    return response.data.folder_path;
+let cachedUserDataPath: string | null = null;
+
+const getUserDataPath = (): string => {
+  // Si ya tenemos la ruta en cache, retornarla
+  if (cachedUserDataPath) {
+    return cachedUserDataPath;
   }
-  return app.getPath("userData") as string;
+
+  try {
+    const response = usersRepository.getById(1);
+    if (response.success && response.data && response.data.folder_path) {
+      cachedUserDataPath = response.data.folder_path;
+      return cachedUserDataPath ?? app.getPath("userData");
+    }
+  } catch (error) {
+    console.warn("Could not fetch user data path from database:", error);
+  }
+
+  // Fallback a la ruta por defecto
+  cachedUserDataPath = app.getPath("userData") as string;
+  return cachedUserDataPath;
 };
-const userDataPath: string = userData();
 
 const filesRepository = {
   /* Utilidades para rutas */
@@ -63,13 +77,13 @@ const filesRepository = {
     return path.join(...paths);
   },
 
-  /* Métodos para manejo de archivos y directorios */
+  /* MÃ©todos para manejo de archivos y directorios */
 
   checkDirectoryExists: async (pathTemp: string) => {
     try {
       const finalPath = path.isAbsolute(pathTemp)
         ? pathTemp
-        : path.join(userDataPath, pathTemp);
+        : path.join(getUserDataPath(), pathTemp);
 
       const exists = await fs
         .access(finalPath)
@@ -88,15 +102,17 @@ const filesRepository = {
   createDirectory: async (pathTemp: string): Promise<ApiResponseDB> => {
     try {
       console.log("Attempting to create directory at", pathTemp);
-      console.log("User path for directory creation:", userDataPath);
+      console.log("User path for directory creation:", getUserDataPath());
       console.log(
         "Full path for directory creation:",
-        path.join(userDataPath, pathTemp),
+        path.join(getUserDataPath(), pathTemp),
       );
-      await fs.mkdir(path.join(userDataPath, pathTemp), { recursive: true });
+      await fs.mkdir(path.join(getUserDataPath(), pathTemp), {
+        recursive: true,
+      });
       console.log(
         "Directory created successfully at",
-        path.join(userDataPath, pathTemp),
+        path.join(getUserDataPath(), pathTemp),
       );
       return returnObjetToResponseApi(
         true,
@@ -119,7 +135,7 @@ const filesRepository = {
     try {
       await fs.cp(
         path.normalize(source),
-        path.join(userDataPath, destination),
+        path.join(getUserDataPath(), destination),
         {
           recursive: true,
           force: true,
@@ -182,7 +198,7 @@ const filesRepository = {
   ): Promise<ApiResponseDB> => {
     try {
       const normalizedSource = path.normalize(source);
-      const destinationPath = path.join(userDataPath, destination);
+      const destinationPath = path.join(getUserDataPath(), destination);
 
       await fs.mkdir(path.dirname(destinationPath), { recursive: true });
       await fs.rm(destinationPath, { force: true });
@@ -213,9 +229,12 @@ const filesRepository = {
     destination: string,
   ): Promise<ApiResponseDB> => {
     try {
-      const normalizedSource = path.join(userDataPath, path.normalize(source));
+      const normalizedSource = path.join(
+        getUserDataPath(),
+        path.normalize(source),
+      );
       const normalizedDestination = path.join(
-        userDataPath,
+        getUserDataPath(),
         path.normalize(destination),
       );
 
@@ -250,9 +269,12 @@ const filesRepository = {
     destination: string,
   ): Promise<ApiResponseDB> => {
     try {
-      const normalizedSource = path.join(userDataPath, path.normalize(source));
+      const normalizedSource = path.join(
+        getUserDataPath(),
+        path.normalize(source),
+      );
       const normalizedDestination = path.join(
-        userDataPath,
+        getUserDataPath(),
         path.normalize(destination),
       );
 
@@ -304,7 +326,7 @@ const filesRepository = {
     try {
       const normalizedSource = path.normalize(source);
       const normalizedDestination = path.join(
-        userDataPath,
+        getUserDataPath(),
         path.normalize(destination),
       );
       const checkIFExistsFolderDestination =
@@ -388,14 +410,16 @@ const filesRepository = {
     });
     return result.filePaths[0];
   },
-  /* Método para descomprimir archivos ZIP */
+  /* MÃ©todo para descomprimir archivos ZIP */
   unzipFile: async (
     zipPath: string,
     extractTo: string,
   ): Promise<ApiResponseDB> => {
     try {
       await createReadStream(path.normalize(zipPath))
-        .pipe(unzipper.Extract({ path: path.join(userDataPath, extractTo) }))
+        .pipe(
+          unzipper.Extract({ path: path.join(getUserDataPath(), extractTo) }),
+        )
         .promise();
       console.log("File unzipped successfully from", zipPath, "to", extractTo);
       return returnObjetToResponseApi(
@@ -412,12 +436,12 @@ const filesRepository = {
       );
     }
   },
-  /* Métodos para eliminar archivos o directorio */
+  /* MÃ©todos para eliminar archivos o directorio */
   deleteFile: async (filePath: string): Promise<ApiResponseDB> => {
     try {
       const fullPath = path.isAbsolute(filePath)
         ? filePath
-        : path.join(userDataPath, filePath);
+        : path.join(getUserDataPath(), filePath);
 
       await fs.rm(fullPath, { force: true });
 
@@ -441,7 +465,7 @@ const filesRepository = {
     try {
       const fullPath = path.isAbsolute(dirPath)
         ? dirPath
-        : path.join(userDataPath, dirPath);
+        : path.join(getUserDataPath(), dirPath);
 
       await fs.rm(fullPath, { recursive: true, force: true });
 
@@ -461,64 +485,64 @@ const filesRepository = {
       );
     }
   },
-  /* Métodos para ejecutar aplicaciones o scripts */
+  /* MÃ©todos para ejecutar aplicaciones o scripts */
   runAppMacOs: async (appPath: string): Promise<ApiResponseDB> => {
     try {
-      const fullPath = path.join(userDataPath, appPath);
+      const fullPath = path.join(getUserDataPath(), appPath);
       exec(`open "${fullPath}"`, (error: any) => {
         if (error) {
           console.error("Error in runAppMacOs:", error);
           return returnObjetToResponseApi(
             false,
-            "Error al ejecutar la aplicación",
+            "Error al ejecutar la aplicaciÃ³n",
             null,
           );
         }
       });
       return returnObjetToResponseApi(
         true,
-        "Aplicación ejecutada exitosamente",
+        "AplicaciÃ³n ejecutada exitosamente",
         null,
       );
     } catch (error) {
       console.error("Error in runAppMacOs:", error);
       return returnObjetToResponseApi(
         false,
-        "Error al ejecutar la aplicación",
+        "Error al ejecutar la aplicaciÃ³n",
         null,
       );
     }
   },
   runAppWindows: async (appPath: string): Promise<ApiResponseDB> => {
     try {
-      const fullPath = path.join(userDataPath, appPath);
+      const fullPath = path.join(getUserDataPath(), appPath);
       exec(`start "" "${fullPath}"`, (error: any) => {
         if (error) {
           console.error("Error in runAppWindows:", error);
           return returnObjetToResponseApi(
             false,
-            "Error al ejecutar la aplicación",
+            "Error al ejecutar la aplicaciÃ³n",
             null,
           );
         }
       });
       return returnObjetToResponseApi(
         true,
-        "Aplicación ejecutada exitosamente",
+        "AplicaciÃ³n ejecutada exitosamente",
         null,
       );
     } catch (error) {
       console.error("Error in runAppWindows:", error);
       return returnObjetToResponseApi(
         false,
-        "Error al ejecutar la aplicación",
+        "Error al ejecutar la aplicaciÃ³n",
         null,
       );
     }
   },
   runShLinux: async (scriptPath: string): Promise<ApiResponseDB> => {
     try {
-      const fullPath = path.join(userDataPath, scriptPath);
+      const fullPath = path.join(getUserDataPath(), scriptPath);
       exec(`sh "${fullPath}"`, (error: any) => {
         if (error) {
           console.error("Error in runShLinux:", error);
