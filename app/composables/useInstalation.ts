@@ -261,7 +261,7 @@ const installModWithModeFolder = async (
   let nameOfExecutable = "";
   if (osName === "MacOS") {
     const exeFilesResponse = await isExeFilesInDirectory(pathFileFolder);
-    if (exeFilesResponse.success || exeFilesResponse.data) {
+    if (exeFilesResponse.success && exeFilesResponse.data) {
       return {
         success: false,
         message: `Se detectaron archivos ejecutables en la carpeta del mod, por favor asegúrate de que no haya ningún archivo ejecutable dentro de la carpeta del mod para continuar con la instalación.`,
@@ -298,7 +298,7 @@ const installModWithModeFolder = async (
     };
   }
   /* Creacion de la carpeta de DDLC dentro de la carpeta del mod */
-  const DDLCFilesPath = `${osName === "MacOS" ? "ddlc-mac" : await window.api.files.joinPaths("ddlc-win-linux", "DDLC-1.1.1-pc")}`;
+  const DDLCFilesPath = "ddlc-files";
 
   const ddlcFolderDirectory = await createDirectory(
     DDLCFilesPath,
@@ -342,7 +342,7 @@ const installModWithModeFolder = async (
       osName === "MacOS"
         ? await window.api.files.joinPaths(
             modFolder.path,
-            "ddlc-mac",
+            "ddlc-files",
             "DDLC.app",
             "Contents",
             "Resources",
@@ -352,7 +352,7 @@ const installModWithModeFolder = async (
           )
         : await window.api.files.joinPaths(
             modFolder.path,
-            "ddlc-win-linux",
+            "ddlc-files",
             "DDLC-1.1.1-pc",
             "game",
             "scripts.rpa",
@@ -361,10 +361,11 @@ const installModWithModeFolder = async (
   }
   /* Copiado de los archivos del mod a la carpeta del mod */
   let pathToDestino = modFolder.path;
+
   if (osName === "MacOS") {
     pathToDestino = await window.api.files.joinPaths(
       pathToDestino,
-      "ddlc-mac",
+      "ddlc-files",
       "DDLC.app",
       "Contents",
       "Resources",
@@ -373,7 +374,7 @@ const installModWithModeFolder = async (
   } else {
     pathToDestino = await window.api.files.joinPaths(
       pathToDestino,
-      "ddlc-win-linux",
+      "ddlc-files",
       "DDLC-1.1.1-pc",
     );
   }
@@ -388,13 +389,23 @@ const installModWithModeFolder = async (
   }
   const finalPath =
     osName === "MacOS"
-      ? await window.api.files.joinPaths(modFolder.path, "ddlc-mac", "DDLC.app")
+      ? await window.api.files.joinPaths(
+          modFolder.path,
+          "ddlc-files",
+          "DDLC.app",
+        )
       : await window.api.files.joinPaths(
           modFolder.path,
-          "ddlc-win-linux",
+          "ddlc-files",
           "DDLC-1.1.1-pc",
           nameOfExecutable,
         );
+
+  if (copyResponse.success) {
+    await window.api.files.delete.directory(
+      await window.api.files.joinPaths(modFolder.path, "ddlc-win-linux"),
+    );
+  }
   return {
     success: true,
     message: "Mod installed successfully.",
