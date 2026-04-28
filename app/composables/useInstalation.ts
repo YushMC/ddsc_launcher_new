@@ -81,48 +81,83 @@ const getCustomExecutableInList = async (
     };
   }
 
-  const executable = DDLCExes.filter((fileName) =>
-    fileName.endsWith(osName === "Windows" ? ".exe" : ".sh"),
-  );
-
-  if (executable.length === 0) {
+  if (!osName || (osName !== "Windows" && osName !== "Linux")) {
     return {
       success: false,
-      message: `No se encontró un archivo ejecutable compatible con el sistema operativo (${osName}) en la carpeta.`,
+      message: "El sistema operativo no es compatible. Os detected: " + osName,
     };
   }
 
-  if (osName === "Linux") {
-    const linuxLauncher = DDLCExes.find((fileName) =>
-      fileName.endsWith("auncher.sh"),
+  if (osName === "Windows") {
+    const WindowsExes = DDLCExes.filter(
+      (item) => item.endsWith(".exe") && !item.endsWith("-32.exe"),
     );
-    if (linuxLauncher) {
+
+    if (WindowsExes.length === 0) {
+      return {
+        success: false,
+        message: `No se encontró un archivo ejecutable compatible con el sistema operativo (${osName}) en la carpeta.`,
+      };
+    }
+    const WindowsExeCustom = WindowsExes.filter(
+      (fileName) => !fileName.endsWith("DDLC.exe"),
+    );
+    if (WindowsExeCustom.length > 0) {
       return {
         success: true,
-        data: linuxLauncher,
+        data: WindowsExeCustom[0],
       };
     } else {
-      const DDLCLinuxSh = DDLCExes.find((fileName) => fileName.endsWith(".sh"));
+      const WindowsExe = WindowsExes.find(
+        (fileName) => fileName === "DDLC.exe",
+      );
+      if (WindowsExe) {
+        return {
+          success: true,
+          data: WindowsExe,
+        };
+      } else {
+        return {
+          success: false,
+          message: `No se encontró un archivo ejecutable compatible en Windows.`,
+        };
+      }
+    }
+  } else {
+    const linuxLauncher = DDLCExes.filter((item) => item.endsWith(".sh"));
+
+    if (linuxLauncher.length === 0) {
+      return {
+        success: false,
+        message: `No se encontró un archivo ejecutable compatible con el sistema operativo (${osName}) en la carpeta.`,
+      };
+    }
+    const filteredLinuxLauncher = linuxLauncher.filter(
+      (fileName) => fileName !== "LinuxLauncher.sh" && fileName !== "DDLC.sh",
+    );
+
+    if (filteredLinuxLauncher.length > 0) {
+      return {
+        success: true,
+        data: filteredLinuxLauncher[0],
+      };
+    } else {
+      const DDLCLinuxSh = linuxLauncher.find(
+        (fileName) => fileName === "DDLC.sh",
+      );
       if (DDLCLinuxSh) {
         return {
           success: true,
           data: DDLCLinuxSh,
         };
+      } else {
+        return {
+          success: false,
+          message: `No se encontró un archivo ejecutable compatible en Linux.`,
+        };
       }
     }
   }
-
-  const WindowsExe = executable.find((fileName) => fileName.endsWith(".exe"));
-  if (WindowsExe) {
-    return {
-      success: true,
-      data: WindowsExe,
-    };
-  }
-  return {
-    success: false,
-    message: `No se encontró un archivo ejecutable compatible con el sistema operativo (${osName}) en la carpeta.`,
-  };
 };
 
 const createDirectory = async (name: string, prevDirectory: string) => {
@@ -210,11 +245,19 @@ const unzipFileFile = async (zipPath: string, destination: string) => {
 const installModWithModeFolder = async (
   isRequiredDeleteFileScripts: boolean,
   modName: string,
-  baseDirectory: string,
   pathFileFolder: string,
   osName: SystemName,
 ) => {
-  console.log("Base directory:", baseDirectory);
+  const baseDirectoryResponse = await window.api.users.get.byID(1);
+
+  if (!baseDirectoryResponse.success || !baseDirectoryResponse.data) {
+    return {
+      success: false,
+      message: `Error getting user data: ${baseDirectoryResponse.message}`,
+    };
+  }
+
+  const baseDirectory = baseDirectoryResponse.data.folder_path;
   let nameOfExecutable = "";
   if (osName === "MacOS") {
     const exeFilesResponse = await isExeFilesInDirectory(pathFileFolder);
@@ -281,7 +324,10 @@ const installModWithModeFolder = async (
   /* Copiado de los archivos de DDLC a la carpeta del mod */
 
   const copyDDLCResponse = await copyInternalDirectory(
-    DDLCFilesPath,
+    await window.api.files.joinPaths(
+      baseDirectory,
+      osName === "MacOS" ? "ddlc-mac" : "ddlc-win-linux",
+    ),
     ddlcFolderDirectory.path,
   );
   if (!copyDDLCResponse.success) {

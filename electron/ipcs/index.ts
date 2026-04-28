@@ -130,6 +130,13 @@ export const Filespc = () => {
   });
 
   ipcMain.handle(
+    ENDPOINTS.files.getAbsoluteDefaultPath,
+    (_, nameFolder: string): string => {
+      return filesRepository.getAbsoluteDefaultPath(nameFolder);
+    },
+  );
+
+  ipcMain.handle(
     ENDPOINTS.files.create.directory,
     async (_, pathTemp: string): Promise<ApiResponseDB> => {
       return await filesRepository.createDirectory(pathTemp);

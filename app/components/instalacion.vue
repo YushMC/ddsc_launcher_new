@@ -154,11 +154,21 @@ const handleSelectFile = async (type: "zip" | "folder") => {
 
 const unzipDDLCFileZip = async () => {
   try {
+    const folderPath = await window.api.users.get.byID(1);
+    if (!folderPath.success || !folderPath.data) {
+      toast.add({
+        title: "Error al obtener el directorio de usuario",
+        description:
+          "Ocurrió un error al obtener el directorio de usuario. Por favor, intenta nuevamente.",
+        color: "error",
+      });
+      return;
+    }
     const osFolderName =
       osName.value === "Windows" || osName.value === "Linux"
         ? "ddlc-win-linux"
         : "ddlc-mac";
-    const isDDLCExist = await window.api.files.check(osFolderName);
+    const isDDLCExist = await window.api.files.check(await window.api.files.joinPaths(folderPath.data.folder_path, osFolderName));
 
     if (isDDLCExist?.data) {
       toast.add({
@@ -170,7 +180,7 @@ const unzipDDLCFileZip = async () => {
     }
 
     const createTempFolderResponse =
-      await window.api.files.create.directory(osFolderName);
+      await window.api.files.create.directory(await window.api.files.joinPaths(folderPath.data.folder_path, osFolderName));
     if (!createTempFolderResponse.success) {
       toast.add({
         title: "Error al crear carpeta temporal",
@@ -182,7 +192,7 @@ const unzipDDLCFileZip = async () => {
     }
     const unZip = await window.api.files.unzip.file(
       pathSelected.value,
-      osFolderName,
+      await window.api.files.joinPaths(folderPath.data.folder_path, osFolderName),
     );
 
     if (!unZip.success) {
@@ -231,11 +241,21 @@ const handleCopyFile = async () => {
     if (typeofFileSelected.value === "zip") {
       await unzipDDLCFileZip();
     } else if (typeofFileSelected.value === "folder") {
+      const folderPath = await window.api.users.get.byID(1);
+      if (!folderPath.success || !folderPath.data) {
+        toast.add({
+          title: "Error al obtener el directorio de usuario",
+          description:
+            "Ocurrió un error al obtener el directorio de usuario. Por favor, intenta nuevamente.",
+          color: "error",
+        });
+        return;
+      }
       await window.api.files.copy.internal.toInternal(
         pathSelected.value,
-        osName.value === "Windows" || osName.value === "Linux"
+        await window.api.files.joinPaths(folderPath.data.folder_path, osName.value === "Windows" || osName.value === "Linux"
           ? "ddlc-win-linux"
-          : "ddlc-mac",
+          : "ddlc-mac"),
       );
     }
 

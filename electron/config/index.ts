@@ -42,6 +42,7 @@ const ENDPOINTS = {
       external: "files/list/external",
     },
     joinPaths: "files/join-paths",
+    getAbsoluteDefaultPath: "files/get-absolute-default",
     copy: {
       file: "files/copy/file",
       directory: "files/copy/directory",

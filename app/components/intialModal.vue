@@ -55,7 +55,7 @@
 const { getSystemOS } = useSO();
 const { createDirectory } = useFilesApiElectron();
 const toast = useToast();
-const directoryName = ref("user_data");
+const directoryName = ref("ddsc_launcher_user_data");
 const instalationLaunher = ref({
   showModal: false,
   folder: "",
@@ -83,7 +83,7 @@ const startIntialFolder = async () => {
   try {
     const pathToSet = instalationLaunher.value.folder.trim()
       ? `${instalationLaunher.value.folder}/${directoryName.value}`
-      : directoryName.value;
+      : await window.api.files.getAbsoluteDefaultPath(directoryName.value);
 
     // Verificar si el directorio ya existe
     await createFolderAndUser(pathToSet);
@@ -140,7 +140,7 @@ onBeforeMount(async () => {
   const getUser = await window.api.users.get.byID(1);
   if (!getUser.success || !getUser.data) {
     if (getSystemOS() && getSystemOS() === "MacOS") {
-      await createFolderAndUser("user_data");
+      await createFolderAndUser("ddsc_launcher_user_data");
       instalationLaunher.value.showModal = false;
       return;
     }

@@ -46,7 +46,7 @@ app.whenReady().then(() => {
   createWindow();
 
   // Remover menu por defecto
-  Menu.setApplicationMenu(null);
+  //Menu.setApplicationMenu(null);
 });
 
 // Cerrar conexión de BD al cerrar app

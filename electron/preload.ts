@@ -94,6 +94,8 @@ contextBridge.exposeInMainWorld(ENDPOINTS.api, {
       ipcRenderer.invoke(ENDPOINTS.files.check, path),
     joinPaths: (...paths: string[]): Promise<string> =>
       ipcRenderer.invoke(ENDPOINTS.files.joinPaths, ...paths),
+    getAbsoluteDefaultPath: (nameFolder: string): Promise<string> =>
+      ipcRenderer.invoke(ENDPOINTS.files.getAbsoluteDefaultPath, nameFolder),
     copy: {
       file: (source: string, destination: string): Promise<ApiResponseDB> =>
         ipcRenderer.invoke(ENDPOINTS.files.copy.file, { source, destination }),

@@ -1,5 +1,5 @@
 import type { SystemName } from "~/types/systemData";
-const { runFileMacOS, runFileWindows, checkFile, createDirectory } =
+const { runFileMacOS, runFileWindows, checkFile, createDirectory, runFileLinux } =
   useFilesApiElectron();
 
 const deleteMod = async (mod: ModDBInterface) => {
@@ -86,6 +86,8 @@ const runApp = async (mod: ModDBInterface, osName: SystemName) => {
     case "MacOS":
       response = await runFileMacOS(mod.path);
       break;
+    case "Linux":
+      response = await runFileLinux(mod.path)
     default:
       return {
         success: false,
@@ -103,15 +105,22 @@ const runApp = async (mod: ModDBInterface, osName: SystemName) => {
 
 const checkIFDDLCFolderExists = async (osName: SystemName) => {
   let response: ApiResponseDB<boolean>;
+  const baseDirectory = await window.api.users.get.byID(1);
+  if(!baseDirectory.success || !baseDirectory.data) {
+    return {
+      success: false,
+      message: "No se pudo obtener el directorio base del usuario",
+    };
+  }
   switch (osName) {
     case "Windows":
-      response = await window.api.files.check(CONST_KEYS.DDLC_FOLDER.windows);
+      response = await window.api.files.check(await window.api.files.joinPaths(baseDirectory.data.folder_path, CONST_KEYS.DDLC_FOLDER.windows));
       break;
     case "Linux":
-      response = await window.api.files.check(CONST_KEYS.DDLC_FOLDER.linux);
+      response = await window.api.files.check(await window.api.files.joinPaths(baseDirectory.data.folder_path, CONST_KEYS.DDLC_FOLDER.linux));
       break;
     case "MacOS":
-      response = await window.api.files.check(CONST_KEYS.DDLC_FOLDER.macos);
+      response = await window.api.files.check(await window.api.files.joinPaths(baseDirectory.data.folder_path, CONST_KEYS.DDLC_FOLDER.macos));
       console.log("Response checking DDLC folder on MacOS:", response);
       break;
     default:

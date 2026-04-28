@@ -1,5 +1,4 @@
 /* files data */
-import path from "path";
 const checkFile = async (path: string) => await window.api.files.check(path);
 
 const copyFile = async (source: string, destination: string) =>

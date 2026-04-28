@@ -10,6 +10,7 @@ interface Window {
 interface FilesApi {
   check: (path: string) => Promise<ApiResponseDB<boolean>>;
   joinPaths: (...paths: string[]) => Promise<string>;
+  getAbsoluteDefaultPath: (nameFolder: string) => Promise<string>;
   list: {
     external: (filePath: string) => Promise<ApiResponseDB<string[]>>;
     internal: (filePath: string) => Promise<ApiResponseDB<string[]>>;

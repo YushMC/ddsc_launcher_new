@@ -1,4 +1,4 @@
-﻿import { promises as fs } from "fs";
+﻿import { constants, promises as fs } from "fs";
 import { createReadStream } from "fs";
 import { returnObjetToResponseApi } from "../utils/querys.js";
 import unzipper from "unzipper";
@@ -37,7 +37,10 @@ const filesRepository = {
     directoryPath: string,
   ): Promise<ApiResponseDB<string[]>> => {
     try {
-      const files = await fs.readdir(path.normalize(directoryPath));
+      const finalDirectoryPath = path.isAbsolute(directoryPath)
+        ? directoryPath
+        : path.join(getUserDataPath(), directoryPath);
+      const files = await fs.readdir(path.normalize(finalDirectoryPath));
       return returnObjetToResponseApi(
         true,
         "Archivos listados exitosamente",
@@ -77,6 +80,10 @@ const filesRepository = {
     return path.join(...paths);
   },
 
+  getAbsoluteDefaultPath: (name: string): string => {
+    return path.join(path.resolve(getUserDataPath()), name);
+  },
+
   /* MÃ©todos para manejo de archivos y directorios */
 
   checkDirectoryExists: async (pathTemp: string) => {
@@ -101,19 +108,13 @@ const filesRepository = {
   },
   createDirectory: async (pathTemp: string): Promise<ApiResponseDB> => {
     try {
-      console.log("Attempting to create directory at", pathTemp);
-      console.log("User path for directory creation:", getUserDataPath());
-      console.log(
-        "Full path for directory creation:",
-        path.join(getUserDataPath(), pathTemp),
-      );
-      await fs.mkdir(path.join(getUserDataPath(), pathTemp), {
+      const finalPath = path.isAbsolute(pathTemp)
+        ? pathTemp
+        : path.join(getUserDataPath(), pathTemp);
+      await fs.mkdir(finalPath, {
         recursive: true,
       });
-      console.log(
-        "Directory created successfully at",
-        path.join(getUserDataPath(), pathTemp),
-      );
+      console.log("Directory created successfully at", finalPath);
       return returnObjetToResponseApi(
         true,
         "Directorio creado exitosamente",
@@ -133,9 +134,15 @@ const filesRepository = {
     destination: string,
   ): Promise<ApiResponseDB> => {
     try {
+      const finalSource = path.isAbsolute(source)
+        ? source
+        : path.join(getUserDataPath(), source);
+      const finalDestination = path.isAbsolute(destination)
+        ? destination
+        : path.join(getUserDataPath(), destination);
       await fs.cp(
-        path.normalize(source),
-        path.join(getUserDataPath(), destination),
+        path.normalize(finalSource),
+        path.normalize(finalDestination),
         {
           recursive: true,
           force: true,
@@ -143,9 +150,9 @@ const filesRepository = {
       );
       console.log(
         "Directory copied successfully from",
-        source,
+        finalSource,
         "to",
-        destination,
+        finalDestination,
       );
       return returnObjetToResponseApi(
         true,
@@ -197,8 +204,12 @@ const filesRepository = {
     destination: string,
   ): Promise<ApiResponseDB> => {
     try {
-      const normalizedSource = path.normalize(source);
-      const destinationPath = path.join(getUserDataPath(), destination);
+      const normalizedSource = path.isAbsolute(source)
+        ? path.normalize(source)
+        : path.join(getUserDataPath(), path.normalize(source));
+      const destinationPath = path.isAbsolute(destination)
+        ? path.normalize(destination)
+        : path.join(getUserDataPath(), path.normalize(destination));
 
       await fs.mkdir(path.dirname(destinationPath), { recursive: true });
       await fs.rm(destinationPath, { force: true });
@@ -269,14 +280,12 @@ const filesRepository = {
     destination: string,
   ): Promise<ApiResponseDB> => {
     try {
-      const normalizedSource = path.join(
-        getUserDataPath(),
-        path.normalize(source),
-      );
-      const normalizedDestination = path.join(
-        getUserDataPath(),
-        path.normalize(destination),
-      );
+      const normalizedSource = path.isAbsolute(source)
+        ? path.normalize(source)
+        : path.join(getUserDataPath(), path.normalize(source));
+      const normalizedDestination = path.isAbsolute(destination)
+        ? path.normalize(destination)
+        : path.join(getUserDataPath(), path.normalize(destination));
 
       const checkIFExistsFolderDestination =
         await filesRepository.checkDirectoryExists(normalizedDestination);
@@ -325,10 +334,9 @@ const filesRepository = {
   ): Promise<ApiResponseDB> => {
     try {
       const normalizedSource = path.normalize(source);
-      const normalizedDestination = path.join(
-        getUserDataPath(),
-        path.normalize(destination),
-      );
+      const normalizedDestination = path.isAbsolute(destination)
+        ? path.normalize(destination)
+        : path.join(getUserDataPath(), path.normalize(destination));
       const checkIFExistsFolderDestination =
         await filesRepository.checkDirectoryExists(normalizedDestination);
 
@@ -416,12 +424,19 @@ const filesRepository = {
     extractTo: string,
   ): Promise<ApiResponseDB> => {
     try {
+      const finalextractTo = path.isAbsolute(extractTo)
+        ? extractTo
+        : path.join(getUserDataPath(), extractTo);
+
       await createReadStream(path.normalize(zipPath))
-        .pipe(
-          unzipper.Extract({ path: path.join(getUserDataPath(), extractTo) }),
-        )
+        .pipe(unzipper.Extract({ path: finalextractTo }))
         .promise();
-      console.log("File unzipped successfully from", zipPath, "to", extractTo);
+      console.log(
+        "File unzipped successfully from",
+        zipPath,
+        "to",
+        finalextractTo,
+      );
       return returnObjetToResponseApi(
         true,
         "Archivo descomprimido exitosamente",
@@ -488,8 +503,10 @@ const filesRepository = {
   /* MÃ©todos para ejecutar aplicaciones o scripts */
   runAppMacOs: async (appPath: string): Promise<ApiResponseDB> => {
     try {
-      const fullPath = path.join(getUserDataPath(), appPath);
-      exec(`open "${fullPath}"`, (error: any) => {
+      const finalPath = path.isAbsolute(appPath)
+        ? appPath
+        : path.join(getUserDataPath(), appPath);
+      exec(`open "${finalPath}"`, (error: any) => {
         if (error) {
           console.error("Error in runAppMacOs:", error);
           return returnObjetToResponseApi(
@@ -515,8 +532,10 @@ const filesRepository = {
   },
   runAppWindows: async (appPath: string): Promise<ApiResponseDB> => {
     try {
-      const fullPath = path.join(getUserDataPath(), appPath);
-      exec(`start "" "${fullPath}"`, (error: any) => {
+      const finalPath = path.isAbsolute(appPath)
+        ? appPath
+        : path.join(getUserDataPath(), appPath);
+      exec(`start "" "${finalPath}"`, (error: any) => {
         if (error) {
           console.error("Error in runAppWindows:", error);
           return returnObjetToResponseApi(
@@ -542,8 +561,16 @@ const filesRepository = {
   },
   runShLinux: async (scriptPath: string): Promise<ApiResponseDB> => {
     try {
-      const fullPath = path.join(getUserDataPath(), scriptPath);
-      exec(`sh "${fullPath}"`, (error: any) => {
+      const finalPath = path.isAbsolute(scriptPath)
+        ? scriptPath
+        : path.join(getUserDataPath(), scriptPath);
+
+      // Asignar permisos ejecutables al archivo
+      const dir = path.dirname(finalPath);
+
+      await ensurePermissionsRecursive(dir);
+
+      exec(`sh "${finalPath}"`, (error: any) => {
         if (error) {
           console.error("Error in runShLinux:", error);
           return returnObjetToResponseApi(
@@ -568,5 +595,29 @@ const filesRepository = {
     }
   },
 };
+
+async function ensurePermissionsRecursive(dir: string) {
+  try {
+    await fs.access(dir, constants.R_OK | constants.X_OK);
+  } catch {
+    await fs.chmod(dir, 0o755);
+  }
+
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      await ensurePermissionsRecursive(fullPath);
+    } else {
+      try {
+        await fs.access(fullPath, constants.X_OK);
+      } catch {
+        await fs.chmod(fullPath, 0o777);
+      }
+    }
+  }
+}
 
 export default filesRepository;

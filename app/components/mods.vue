@@ -93,7 +93,8 @@
 
 <script setup lang="ts">
 import type { SystemName } from "~/types/systemData";
-import CONST_KEYS from "~/utils/constants";
+const { checkIFDDLCFolderExists } =
+  useLibraryMods();
 
 const toast = useToast();
 const osName = ref<SystemName | null>(null);
@@ -147,24 +148,6 @@ const getAllModsFromApi = async () => {
   }
 };
 
-const checkIFDDLCFolderExists = async (osName: SystemName) => {
-  let response: ApiResponseDB<boolean>;
-  switch (osName) {
-    case "Windows":
-      response = await window.api.files.check(CONST_KEYS.DDLC_FOLDER.windows);
-      break;
-    case "Linux":
-      response = await window.api.files.check(CONST_KEYS.DDLC_FOLDER.linux);
-      break;
-    case "MacOS":
-      response = await window.api.files.check(CONST_KEYS.DDLC_FOLDER.macos);
-      console.log("Response checking DDLC folder on MacOS:", response);
-      break;
-    default:
-      throw new Error("Sistema operativo no soportado");
-  }
-  return response;
-};
 
 const hanldeModeInstallation = async () => {
   if (!modId.value) {
@@ -228,7 +211,6 @@ const hanldeModeInstallation = async () => {
   const response = await installModWithModeFolder(
     isRequiredDeleteFileScripts.value,
     selectedMod.resource.slug.replaceAll(/-/g, "_"),
-    baseDirectory,
     pathFileFolder.value,
     osName.value,
   );
@@ -266,7 +248,7 @@ const hanldeModeInstallation = async () => {
     color: response.success ? "success" : "error",
     duration: 5000,
   });
-  window.location.reload(); // Recarga la página para actualizar la lista de mods instalados
+  //window.location.reload(); // Recarga la página para actualizar la lista de mods instalados
 };
 
 onBeforeMount(async () => {

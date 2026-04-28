@@ -4,7 +4,7 @@ const SYSTEM_OS = ref<SystemName | null>(null);
 const idUser = ref<number | null>(null);
 
 const getSystemOS = () => SYSTEM_OS.value;
-const getDirectoryName = () => "user_data";
+const getDirectoryName = () => ref("ddsc_launcher_user_data");
 const getIdUser = () => idUser.value;
 
 const setIdUser = (id: number | null) => {
